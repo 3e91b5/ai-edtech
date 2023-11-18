@@ -38,7 +38,7 @@ class EdTechApp:
 		try:
 	        	conn = init_connection()
 			with conn.cursor() as cur:
-	            		cur.execute(query)
+				cur.execute(query)
 		except psycopg2.Error as e:
 			print("DB error: ", e)
 			conn.rollback()
