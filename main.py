@@ -1,8 +1,11 @@
 import streamlit as st
 
-st.set_page_config(
-		page_title = "AI-EdTech",
-)
+st.set_page_config(page_title = "AI-EdTech")
+st.subheader("신청 조회 및 취소")
+with st.form("my_form1"):
+    sid = st.text_input('Student ID:', autocomplete="on", placeholder="학번입력", max_chars=10)
+    spwd = st.text_input('Password:', type='password', max_chars=4, help='4자리 비밀번호 입력')
+    submitted = st.form_submit_button("조회")
 
 from streamlit_option_menu import option_menu
 import problemset, account
