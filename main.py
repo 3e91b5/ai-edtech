@@ -36,7 +36,7 @@ class EdTechApp:
 
 	def run_tx(query):
 		try:
-	        	conn = init_connection()
+			conn = init_connection()
 			with conn.cursor() as cur:
 				cur.execute(query)
 		except psycopg2.Error as e:
