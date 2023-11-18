@@ -19,7 +19,7 @@ def init_connection():
 	return psycopg2.connect("host=147.47.200.145 dbname=teamdb3 user=team3 password=eduteam3# port=34543")
 	
 def gpt_connection():
-	api_key = '[AUTH_KEY]'
+	api_key = '[AUTH_KEY 입력]'
 	return api_key
 		
 def run_query(query):
@@ -57,7 +57,6 @@ def run_gpt(query):
 	msg = response['choices'][0]['message']['content']
 	return msg
 		
-
 with st.sidebar:
 	app = option_menu(
 	menu_title = 'Menu',
@@ -71,19 +70,23 @@ with st.sidebar:
 		"nav-link": {"color": "white", "font-size": "20px", "text-align": "left", "margin": "0px"},
 		"nav-link-selected": {"background-color": "#02ab21"},}
 		)
+	
 if app == "Home":
 	with st.form("form1"):
 		pid = st.text_input('ID:', autocomplete="on", placeholder="아이디 입력", max_chars=10)
-		password = st.text_input('Password:', type='password', placeholder="4자리 비밀번호 입력", max_chars=4)
+		password = st.text_input('Password:', type='password', placeholder="비밀번호 입력", max_chars=4)
 		submitted = st.form_submit_button("로그인")
 		if submitted:
 			if pid and password:
-				st.success("로그인 성공!")
-				#check_sql = f"SELECT * FROM studentdb WHERE pid = '{pid}' and password = {password}"
-				#if run_query(check_sql).empty:
-				#	st.error("ID 혹은 비밀번호를 다시 입력해주세요")
-				#else:
-				#	st.success("로그인 성공!")
+				'''
+    				# student db 필요
+				check_sql = f"SELECT * FROM studentdb WHERE pid = '{pid}' and password = {password}"
+				if run_query(check_sql).empty:
+					st.error("ID 혹은 비밀번호를 다시 입력해주세요")
+				else:
+					st.success("로그인 성공!")
+     					# student db에서 정보 가져옴 -> problemset, account 페이지로 연결
+    				'''
 			else:
 				st.error("모든 정보를 입력해주세요")
 
