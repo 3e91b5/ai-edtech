@@ -78,11 +78,12 @@ if app == "Home":
 		submitted = st.form_submit_button("로그인")
 		if submitted:
 			if pid and password:
-				check_sql = f"SELECT * FROM studentdb WHERE pid = '{pid}' and password = {password}"
-				if run_query(check_sql).empty:
-					st.error("ID 혹은 비밀번호를 다시 입력해주세요")
-				else:
-					st.success("로그인 성공!")
+				st.success("로그인 성공!")
+				#check_sql = f"SELECT * FROM studentdb WHERE pid = '{pid}' and password = {password}"
+				#if run_query(check_sql).empty:
+				#	st.error("ID 혹은 비밀번호를 다시 입력해주세요")
+				#else:
+				#	st.success("로그인 성공!")
 			else:
 				st.error("모든 정보를 입력해주세요")
 
