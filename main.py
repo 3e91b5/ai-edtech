@@ -2,8 +2,8 @@ import streamlit as st
 from streamlit_option_menu import option_menu
 import pandas as pd
 import psycopg2
-import openai
-import problemset, account
+import openai 
+import problemset, account 
 st.set_page_config(page_title = "AI-EdTech")
 
 class EdTechApp:
