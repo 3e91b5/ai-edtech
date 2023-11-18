@@ -16,12 +16,12 @@ class MultiApp:
 		})
 		
 	def init_connection():
-    		return psycopg2.connect("host=147.47.200.145 dbname=DB이름 user=유저명 password=비밀번호 port=34543")
+    		return psycopg2.connect("host=147.47.200.145 dbname=teamdb3 user=team3 password=qwer3 port=34543")
 
 	def run_query(query):
 	    try:
 	        conn = init_connection()
-	        df = pd.read_sql(query,conn)
+	        df = pd.read_sql(query, conn)
 	    except psycopg2.Error as e:
 	        # 데이터베이스 에러 처리
 	        print("DB error: ", e)
@@ -54,16 +54,18 @@ class MultiApp:
 			menu_icon='chat-text-fill',
 			default_index=1,
 			styles={
-				"container": {"padding": "5!important", "background-color": 'black'},
+				"container": {"padding": "5!important", "background-color": 'gray'},
 				"icon": {"color": "white", "font-size": "23px"},
 				"nav-link": {"color": "white", "font-size": "20px", "text-align": "left", "margin": "0px"},
 				"nav-link-selected": {"background-color": "#02ab21"},}
 				)
-		st.subheader("로그인")
-		with st.form("form1"):
-    			sid = st.text_input('ID:', autocomplete="on", placeholder="아이디 입력", max_chars=10)
-    			spwd = st.text_input('Password:', type='password', max_chars=4, help='4자리 비밀번호 입력')
-    			submitted = st.form_submit_button("로그인")
+		if app == 'Main':
+			with st.form("form1"):
+	    			sid = st.text_input('ID:', autocomplete="on", placeholder="아이디 입력", max_chars=10)
+	    			spwd = st.text_input('Password:', type='password', placeholder="4자리 비밀번호 입력", max_chars=4)
+	    			submitted = st.form_submit_button("로그인")
+			df = run_query('SELECT * FROM student ORDER BY sid ')
+			st.table(df)
 
     # run the app function inside the main.py file
 		if app == 'Problem-sets':
