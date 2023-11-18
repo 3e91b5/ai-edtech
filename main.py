@@ -17,36 +17,36 @@ class EdTechApp:
 		})
 		
 	def init_connection():
-    		return psycopg2.connect("host=147.47.200.145 dbname=teamdb3 user=team3 password=eduteam3# port=34543")
+		return psycopg2.connect("host=147.47.200.145 dbname=teamdb3 user=team3 password=eduteam3# port=34543")
 	
 	def gpt_connection():
 		api_key = '[AUTH_KEY]'
 		return api_key
 		
 	def run_query(query):
-	    try:
-	        conn = init_connection()
-	        df = pd.read_sql(query, conn)
-	    except psycopg2.Error as e:
-	        print("DB error: ", e)
-	        conn.close()
-	    finally:
-	        conn.close()
-	    return df
+		try:
+			conn = init_connection()
+			df = pd.read_sql(query, conn)
+		except psycopg2.Error as e:
+			print("DB error: ", e)
+			conn.close()
+		finally:
+	        	conn.close()
+		return df
 
 	def run_tx(query):
-	    try:
-	        conn = init_connection()
-	        with conn.cursor() as cur:
-	            cur.execute(query)
-	    except psycopg2.Error as e:
-	        print("DB error: ", e)
-	        conn.rollback()
-	        conn.close()
-	    finally:
-	        conn.commit()
-	        conn.close()
-	    return
+		try:
+	        	conn = init_connection()
+			with conn.cursor() as cur:
+	            		cur.execute(query)
+		except psycopg2.Error as e:
+			print("DB error: ", e)
+			conn.rollback()
+	        	conn.close()
+		finally:
+			conn.commit()
+			conn.close()
+		return
 
 	def run_gpt(query):
 		openai.api_key = gpt_connection()
@@ -74,9 +74,18 @@ class EdTechApp:
 				)
 		if app == "Home":
 			with st.form("form1"):
-				sid = st.text_input('ID:', autocomplete="on", placeholder="아이디 입력", max_chars=10)
-				spwd = st.text_input('Password:', type='password', placeholder="4자리 비밀번호 입력", max_chars=4)
+				pid = st.text_input('ID:', autocomplete="on", placeholder="아이디 입력", max_chars=10)
+				password = st.text_input('Password:', type='password', placeholder="4자리 비밀번호 입력", max_chars=4)
 				submitted = st.form_submit_button("로그인")
+				if submitted:
+					if pid and password:
+						check_sql = f"SELECT * FROM studentdb WHERE pid = '{pid}' and password = {password}"
+						if run_query(check_sql).empty:
+							st.error("ID 혹은 비밀번호를 다시 입력해주세요")
+						else:
+							st.success("로그인 성공!")
+					else:
+						st.error("모든 정보를 입력해주세요")
 
 		if app == 'Problem-sets':
 			problemset.app() 
