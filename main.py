@@ -16,7 +16,7 @@ class MultiApp:
 		})
 		
 	def init_connection():
-    		return psycopg2.connect("host=147.47.200.145 dbname=teamdb3 user=team3 password=qwer3 port=34543")
+    		return psycopg2.connect("host=147.47.200.145 dbname=teamdb3 user=team3 password=eduteam3# port=34543")
 
 	def run_query(query):
 	    try:
