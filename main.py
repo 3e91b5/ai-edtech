@@ -42,7 +42,7 @@ class EdTechApp:
 		except psycopg2.Error as e:
 			print("DB error: ", e)
 			conn.rollback()
-	        	conn.close()
+			conn.close()
 		finally:
 			conn.commit()
 			conn.close()
