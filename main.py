@@ -1,11 +1,10 @@
 import streamlit as st
-st.set_page_config(page_title = "AI-EdTech")
-
 from streamlit_option_menu import option_menu
 import pandas as pd
 import psycopg2
 import openai
 import problemset, account
+st.set_page_config(page_title = "AI-EdTech")
 
 class EdTechApp:
 	def __init__(self):
@@ -53,7 +52,7 @@ class EdTechApp:
 		openai.api_key = gpt_connection()
 		messages = [{"role": "", "content": ""}] 
 		response = openai.ChatCompletion.create(
-			model = 'gpt-',
+			model = 'gpt-4',
 			messages = messages
 		)
 		msg = response['choices'][0]['message']['content']
