@@ -1,0 +1,14 @@
+# secret
+./streamlit/secrets.toml
+
+
+# node_modules
+node_modules/
+package-lock.json
+package.json
+
+# Virtual environment
+__pycache__/
+
+#log
+content/logs.txt
