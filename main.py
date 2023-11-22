@@ -101,7 +101,7 @@ if st.session_state["login"] == False:	# if not logged in
 					if login:
 						st.session_state['login'] = True
 						st.session_state['sid'] = sid
-						if st.session_state['sid'] == 'test':
+						if db.is_admin(sid):
 							st.session_state['admin'] = True
 						st.success("로그인 중.")
     

@@ -43,7 +43,7 @@ def add_user(sid,password):
 
 	if result.empty:
 		print(datetime.datetime.now(), "user data를 추가합니다.", sid, password)
-		add_query = f"INSERT INTO edutech.studentdb (sid, password) VALUES('{sid}', '{password}')"
+		add_query = f"INSERT INTO edutech.studentdb (sid, password, admin) VALUES('{sid}', '{password}', False)"
 		run_tx(add_query)
 		return True
 	else:
@@ -64,12 +64,24 @@ def view_all_users():
 	return result
 
 def delete_user(sid):
-	query = f"DELETE FROM edutech.studentdb WHERE sid = '{sid}'"
-	result = run_tx(query)
+	query = f"select * from edutech.studentdb where sid = '{sid}'"
+	result = run_query(query)
 	if result.empty:
 		return False
-	else:
+	query = f"DELETE FROM edutech.studentdb WHERE sid = '{sid}'"
+	run_tx(query)
+	print(datetime.datetime.now(), "delete user", sid)
+	
+	return True
+
+def is_admin(sid):
+	query = f"SELECT admin FROM edutech.studentdb WHERE sid = '{sid}'"
+	result = run_query(query)
+	if result == True:
 		return True
+	else:
+		return False
+
 
 def update_user_password(sid, new_password):
 	query = f"UPDATE edutech.studentdb SET password = '{new_password}' WHERE sid = '{sid}'"

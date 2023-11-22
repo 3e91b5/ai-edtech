@@ -13,9 +13,7 @@ if st.session_state['login'] == False:
         submitted = st.form_submit_button("회원가입")
         if submitted:
             if new_sid and new_password:
-                print(datetime.datetime.now(), "signup submitted")
-                print(datetime.datetime.now(), "  ID: ", new_sid)
-                print(datetime.datetime.now(), "  password: ", new_password)
+                print(datetime.datetime.now(), "signup submitted", new_sid, new_password)
                 success = db.add_user(new_sid, new_password)
                 if success:
                     st.success("회원가입 성공! 로그인해주세요")
@@ -30,8 +28,9 @@ if st.session_state['login'] == False:
 else:
     # TODO: redirect to another page
     st.write("이미 로그인중입니다.")
-    st.button("Home", on_click=switch_page("main"))
-
+    clicked = st.button("Go to main page")
+    if clicked:
+        switch_page("main")
 
 
 
