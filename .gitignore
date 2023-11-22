@@ -12,3 +12,6 @@ __pycache__/
 
 #log
 content/logs.txt
+
+#test
+./chatgpt_test.py

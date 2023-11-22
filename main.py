@@ -1,7 +1,7 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
 from streamlit_extras.switch_page_button import switch_page 
-
+import datetime
 import pandas as pd
 import time
 
@@ -18,10 +18,11 @@ st.set_page_config(
 
 # session state initialization
 if 'login' not in st.session_state: # should be changed to more clever way
-	print("init session state")
-	st.session_state['pid'] = None
-	st.session_state['login'] = False
-	st.session_state['teacher'] = False
+	print(datetime.datetime.now(), "init session state")
+	st.session_state['sid'] = None # name of the student
+	st.session_state['login'] = False # whether the user is logged in or not
+	st.session_state['teacher'] = False # whether the user is a teacher or not
+	st.session_state['admin'] = False # whether the user is an admin or not
 
 
 
@@ -50,54 +51,82 @@ def add_app(self, title, function):
 # 		"nav-link-selected": {"background-color": "#02ab21"},}
 # 		)
 
+# callback function for submit button to write log
 def submit_callback(button_name):
-    if button_name == '로그인' and pid == "" and password == "":
+    if button_name == '로그인' and sid == "" and password == "":
         pass
     else:
-        print(button_name,"submitted", pid, password)
+        print(datetime.datetime.now(), button_name,"submitted", sid, password)
 
 def logout_callback():
-    print('logout callback')
+    print(datetime.datetime.now(), 'logout callback')
     st.session_state['login'] = False
-    st.session_state['pid'] = None
+    st.session_state['sid'] = None
     st.session_state['teacher'] = False	
+    st.session_state['admin'] = False
 
 
 
 # TODO: main page contents
+st.title("AI-EdTech")
+st.header("My header")
+st.subheader("My subheader")
 
-
-
-if st.session_state["login"] == False:
+# the main page
+if st.session_state["login"] == False:	# if not logged in
 	# login box
 	with st.form("home"):
 			st.write("Login Page")
-			pid = st.text_input('ID:', autocomplete="on", placeholder="아이디 입력", max_chars=10)
-			password = st.text_input('Password:', type='password', placeholder="비밀번호 입력", max_chars=4)
-
-			
+			sid = st.text_input('ID:', autocomplete="on", placeholder="아이디 입력", max_chars=10)
+			password = st.text_input('Password:', type='password', placeholder="비밀번호 입력", max_chars=4)			
 			submitted = st.form_submit_button("로그인", on_click=submit_callback('로그인'))
     
+			# if login button is clicked,
+			# 1. check whether sid and password are not empty
+			# 2. check whether (sid, password) pair is in the database (in funtion db.login_user)
+			# 3. if yes, 
+			#		set session_state['login'] to True, 
+			# 		session_state['sid'] to user's sid,
+			#		session_state['teacher'] to True if the user is a teacher, 
+			#		and session_state['admin'] to True if the user is an admin  
+			# 4. switch page to account page (default page)
+
 			if submitted:
-				if pid and password:
+				if sid and password:
 					
-					login = db.login_user(pid,password)
+					login = db.login_user(sid,password)
 					if login:
 						st.session_state['login'] = True
-						st.session_state['pid'] = pid
-						st.success("로그인 성공! 3초 뒤 페이지가 이동됩니다.")
-						
+						st.session_state['sid'] = sid
+						if st.session_state['sid'] == 'test':
+							st.session_state['admin'] = True
+						st.success("로그인 중.")
+    
+						# progress bar
+						# progress_text = "Please wait."
+						# my_bar = st.progress(0, text = progress_text)
+						# for percent_complete in range(100):
+						# 	time.sleep(0.01)
+						# 	my_bar.progress(percent_complete + 1, text = progress_text)
+						# my_bar.empty()
+    
+    
 						# redirect to account page after few seconds
-						time.sleep(3)
+						time.sleep(1)
+						
 						switch_page("Account")
-					else:
+    
+					else: # if login fails
 						st.error("ID 혹은 비밀번호를 다시 입력해주세요")
-				else:
+				else: # if sid or password is empty
 					st.error("모든 정보를 입력해주세요")
 	if st.button("회원가입"):
 		switch_page('signup')
-else:
-    st.write("로그인 중", "ID:", st.session_state["pid"])
+else: # if logged in
+    
+	# show login status
+    st.write("로그인 중", "ID:", st.session_state["sid"])
+	# show logout button
     if st.button('로그아웃'):
         logout_callback()
         switch_page('main')
@@ -106,45 +135,3 @@ else:
     
 
     
-# if app == "Home":
-# 	with st.form("form1"):
-# 		st.write("Login Page")
-# 		pid = st.text_input('ID:', autocomplete="on", placeholder="아이디 입력", max_chars=10)
-# 		password = st.text_input('Password:', type='password', placeholder="비밀번호 입력", max_chars=4)
-
-# 		submitted = st.form_submit_button("로그인", on_click=submit_callback('로그인'))
-# 		if submitted:
-# 			if pid and password:
-				
-# 				login = db.login_user(pid,password)
-# 				if login:
-# 					st.success("로그인 성공!")
-# 					# redirect to account page after few seconds
-# 					switch_page("Account")
-# 					pass
-					
-# 				else:
-# 					st.error("ID 혹은 비밀번호를 다시 입력해주세요")
-# 			else:
-# 				st.error("모든 정보를 입력해주세요")
-# 	if st.button("회원가입"):
-# 		switch_page('sign-up')
-# 		# pid = st.text_input('ID:', autocomplete="on", placeholder="아이디 입력", max_chars=10)
-# 		# password = st.text_input('Password:', type='password', placeholder="비밀번호 입력", max_chars=4)
-# 		# if pid == "" or password == "":
-# 		# 	st.error("모든 정보를 입력해주세요")
-# 		# else:
-# 		# 	add_user(pid,password)
-# 	# with st.form("form2"):
-# 	# 	signup = st.link_button("회원가입")
-# 	# 	if signup:
-# 	# 		pass
-			
-
-# if app == 'Problem-sets':
-# 	problemset.app() 
-# if app == 'Account':
-# 	account.app() 
-	
-# if app == 'Sign-up':
-# 	signup.app()

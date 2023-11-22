@@ -1,24 +1,25 @@
 import streamlit as st
 from streamlit_extras.switch_page_button import switch_page 
 import src.db as db
+import datetime
 
 # def app():
 
 if st.session_state['login'] == False:
     st.write("signup page")
     with st.form("signup"):
-        new_pid = st.text_input('ID:', autocomplete="on", placeholder="아이디 입력", max_chars=10)
+        new_sid = st.text_input('ID:', autocomplete="on", placeholder="아이디 입력", max_chars=10)
         new_password = st.text_input('Password:', type='password', placeholder="비밀번호 입력", max_chars=4)
         submitted = st.form_submit_button("회원가입")
         if submitted:
-            if new_pid and new_password:
-                print("signup submitted")
-                print("  ID: ", new_pid)
-                print("  password: ", new_password)
-                success = db.add_user(new_pid, new_password)
+            if new_sid and new_password:
+                print(datetime.datetime.now(), "signup submitted")
+                print(datetime.datetime.now(), "  ID: ", new_sid)
+                print(datetime.datetime.now(), "  password: ", new_password)
+                success = db.add_user(new_sid, new_password)
                 if success:
                     st.success("회원가입 성공! 로그인해주세요")
-                    switch_page("Home")
+                    switch_page("main")
                 else:
                     st.error("이미 존재하는 ID입니다.")
             else:

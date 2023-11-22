@@ -1,28 +1,29 @@
 from openai import OpenAI
+import time
 import datetime
 
-# migration guide: https://github.com/openai/openai-python/discussions/742
-
-api_key = ''
-def save_apikey(apikey):
-    global api_key
-    api_key = apikey
-
-def run_gpt(query):
-    #TODO
-    pass
+apikey = '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'
 
 
-# TODO: gpt now has an error. idk why. error message below.
+
+
+# TODO: gpt now has error. idk why. error message below.
 def run_gpt_helloworld():
     client = OpenAI(
     # defaults to os.environ.get("OPENAI_API_KEY")
-    api_key=api_key,
+    api_key=apikey,
 	)
-    completion = client.completions.create(model='curie', prompt="This is a test")
-    print(datetime.datetime.now(), completion.choices[0].text)
-    print(datetime.datetime.now(), dict(completion).choices[0].text)
-    print(datetime.datetime.now(), completion.model_dump_json(indent=2))
+    
+    completion = client.chat.completions.create(
+    model="gpt-3.5-turbo",
+    messages=[
+        {"role": "system", "content": "You are a poetic assistant, skilled in explaining complex programming concepts with creative flair."},
+        {"role": "user", "content": "Compose a poem that explains the concept of recursion in programming."}
+    ]
+    )
+
+    print(datetime.datetime.now(), completion.choices[0].message)
+    
     
 ###### error message ######
 # Traceback (most recent call last):
@@ -51,27 +52,9 @@ def run_gpt_helloworld():
 # openai.RateLimitError: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
 ############################
 
-# get the question from student and do prompt engineering for gpt
-def prompt(question):
-    #TODO
-	pass	
 
 
-
-
-
-# def gpt_connection():
-# 	api_key = '[AUTH_KEY 입력]'
-# 	return api_key
-
-# def run_gpt(query):
-# 	openai.api_key = gpt_connection()
-# 	messages = [{"role": "", "content": ""}] 
-# 	response = openai.ChatCompletion.create(
-# 		model = 'gpt-4',
-# 		messages = messages
-# 	)
-# 	msg = response['choices'][0]['message']['content']
-# 	return msg
-	
-
+# run_gpt_helloworld()
+import random
+randomlist = random.sample(range(10, 30), 5)
+print(randomlist)

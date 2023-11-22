@@ -2,7 +2,7 @@ import streamlit as st
 import src.gpt as gpt
 
 
-
+st.write("Demo page for testing GPT")
 if st.session_state['login'] == True:
     st.write("chatbot page")   
     with st.form('authkey'):
