@@ -71,6 +71,9 @@ def logout_callback():
 st.title("AI-EdTech")
 st.header("My header")
 st.subheader("My subheader")
+link = '[GitHub](https://github.com/jean-jsj/ai-edtech/tree/jhkim)'
+st.markdown(link, unsafe_allow_html=True)
+# st.link_button("Github", "https://github.com/jean-jsj/ai-edtech/tree/jhkim")
 
 # the main page
 if st.session_state["login"] == False:	# if not logged in

@@ -14,4 +14,4 @@ __pycache__/
 content/logs.txt
 
 #test
-./chatgpt_test.py
+chatgpt_test.py

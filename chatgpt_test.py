@@ -2,7 +2,7 @@ from openai import OpenAI
 import time
 import datetime
 
-apikey = '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'
+apikey = ''
 
 
 
