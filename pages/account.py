@@ -6,6 +6,10 @@ import time
 st.write("account page")
 
 if st.session_state['login']== True:
+  
+  st.write(f"{st.session_state['sid']}님 환영합니다.")
+  if st.session_state['admin'] == True:
+    st.write("관리자입니다")
   if st.session_state['teacher'] == True:
     # account menu for teacher
     pass

@@ -77,7 +77,9 @@ def delete_user(sid):
 def is_admin(sid):
 	query = f"SELECT admin FROM edutech.studentdb WHERE sid = '{sid}'"
 	result = run_query(query)
-	if result == True:
+	print(datetime.datetime.now(), "is_admin",  result['admin'][0])
+	
+	if result['admin'][0] == True:
 		return True
 	else:
 		return False
