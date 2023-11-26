@@ -8,10 +8,9 @@ warnings.filterwarnings(action='ignore')
 
 def init_connection():
     #### WARNING ####
-    # database password should be erased before pushing to github
-	return psycopg2.connect("host=147.47.200.145 dbname=teamdb3 user=team3 password=eduteam3# port=34543")
+    # database password should be removed before pushing to github
+	return psycopg2.connect("host=147.47.200.145 dbname=teamdb3 user=team3 password=0 port=34543")
 	
-
 def run_query(query):
     print(datetime.datetime.now(), 'run query:',  query)
     try:
@@ -85,7 +84,6 @@ def login_user(sid,password):
 	# query =f"SELECT * FROM edutech.studentdb WHERE sid ='{sid}' AND password = '{password}'"
 	query = f"SELECT * FROM student_db.students WHERE account = '{sid}' AND password = '{password}'"
 	result = run_query(query)
-
 	if result.empty:
 		return False
 	else:
@@ -121,7 +119,6 @@ def is_admin(sid):
 		return True
 	else:
 		return False
-
 
 def update_user_password(sid, new_password):
 	query = f"UPDATE student_db.students SET password = '{new_password}' WHERE account = '{sid}'"
