@@ -9,7 +9,7 @@ if st.session_state['login'] == True:
         apikey = st.text_input('인증키를 입력하세요')
         submitted = st.form_submit_button("인증하기")
         if submitted:
-            gpt.save_apikey(apikey)
+            gpt.set_apikey(apikey)
             gpt.run_gpt_helloworld()
             
         

@@ -1,12 +1,25 @@
 from openai import OpenAI
+import streamlit as st
 import datetime
 
 # migration guide: https://github.com/openai/openai-python/discussions/742
 
-api_key = ''
-def save_apikey(apikey):
-    global api_key
-    api_key = apikey
+
+def set_apikey(apikey):
+
+    st.session_state["api_key"] = apikey
+    # api_key = apikey
+
+def get_apikey():
+    return st.session_state["api_key"]
+
+
+# 0 git branch jwhong
+# 1 git add .
+# 2 git commit -> commit 메세지 작성
+# 3 git push origin jwhong
+# origin = 내 로컬 작업환경
+
 
 def run_gpt(query):
     #TODO
@@ -17,12 +30,15 @@ def run_gpt(query):
 def run_gpt_helloworld():
     client = OpenAI(
     # defaults to os.environ.get("OPENAI_API_KEY")
-    api_key=api_key,
+    api_key=get_apikey(),
 	)
-    completion = client.completions.create(model='curie', prompt="This is a test")
-    print(datetime.datetime.now(), completion.choices[0].text)
-    print(datetime.datetime.now(), dict(completion).choices[0].text)
-    print(datetime.datetime.now(), completion.model_dump_json(indent=2))
+    completion = client.completions.create(model='gpt-3.5-turbo', prompt="This is a test")
+    
+    
+    
+    # print(datetime.datetime.now(), completion.choices[0].text)
+    # print(datetime.datetime.now(), dict(completion).choices[0].text)
+    # print(datetime.datetime.now(), completion.model_dump_json(indent=2))
     
 ###### error message ######
 # Traceback (most recent call last):
