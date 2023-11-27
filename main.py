@@ -118,6 +118,4 @@ else: # if logged in
         switch_page('main')
     
     # st.button('로그아웃', on_click=logout_callback()) #왜 안되냐
-    
-
 '''
