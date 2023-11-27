@@ -9,7 +9,7 @@ warnings.filterwarnings(action='ignore')
 def init_connection():
     #### WARNING ####
     # database password should be removed before pushing to github
-	return psycopg2.connect("host=147.47.200.145 dbname=teamdb3 user=team3 password=0 port=34543")
+	return psycopg2.connect(f"host=147.47.200.145 dbname=teamdb3 user=team3 password={st.secrets['password']} port=34543")
 	
 def run_query(query):
     print(datetime.datetime.now(), 'run query:',  query)
@@ -45,23 +45,6 @@ def get_student_info(account):
 		return False
 	else:
 		return result
-
-# def get_student_id(account):
-# 	query = f"SELECT student_id FROM student_db.students WHERE account = '{account}'"
-# 	result = run_query(query)
-# 	if result.empty:
-# 		return False
-# 	else:
-# 		return result['sid'][0]
-
-# def get_student_name(account):
-# 	query = f"SELECT name FROM student_db.students WHERE account = '{account}'"
-# 	result = run_query(query)
-# 	if result.empty:
-# 		return False
-# 	else:
-# 		return result['name'][0]
-
 
 def add_user(sid,password, name, age, grade):
 	# query = f"SELECT * FROM edutech.studentdb WHERE sid = '{sid}'"
