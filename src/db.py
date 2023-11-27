@@ -104,7 +104,7 @@ def update_user_password(student_id, new_password):
 ##### student info #####
 # school grade (학년)
 def get_student_grade(student_id):
-	query = f"SELECT grade FROM student_db.students WHERE student_id = 12345678"
+	query = "SELECT grade FROM student_db.students WHERE student_id = {0}".format(12345678)
 	result = run_query(query)
 	if result.empty:
 		return False
@@ -177,7 +177,7 @@ def get_average_score(student_id):
 ##### 문제 풀이 페이지 구현 #####
 # 학년별 list of units 
 def get_units(grade):
-	query = f"SELECT unit_id FROM knowledge_map_db.sub_unit WHERE grade = 10"
+	query = "SELECT unit_id FROM knowledge_map_db.sub_unit WHERE grade = {0}".format(10)
 	result = run_query(query)
 	if result.empty:
 		return False
