@@ -22,6 +22,8 @@ def session_state_reset():
 	st.session_state['teacher'] = False
 	st.session_state['admin'] = False
 	st.session_state['api_key'] = None
+	st.session_state['gpt_session'] = False
+	st.session_state['gpt_client'] = None
 
 # session state initialization
 if 'login' not in st.session_state: # should be changed to more clever way

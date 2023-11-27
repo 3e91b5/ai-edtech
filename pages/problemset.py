@@ -1,7 +1,13 @@
 import streamlit as st
 import src.db as db
 
+
+st.set_page_config(
+    page_title = "Problem-set",
+)
+
 st.write("problem set page")
+
 
 
 
