@@ -6,27 +6,27 @@ import src.app as app
 
 ### toy data로 작업
 problems = pd.read_excel('qid.xlsx')
-topics = ['다항식','방정식과 부등식','경우의 수','행렬','도형의 방정식','집합과 명제','함수와 그래프']
+units = ['다항식','방정식과 부등식','경우의 수','행렬','도형의 방정식','집합과 명제','함수와 그래프']
 '''
-sid = st.session_state['sid']
-grade = get_student_grade(sid)
-topics = db.get_topics(grade)
+student_id = st.session_state['student_id']
+grade = get_student_grade(student_id)
+units = db.get_units(grade)
 '''
 ### 화면 구성
 st.header("학습메뉴")
 col1, padding, col2, col3, col4, col5 = st.columns([3,1,2,2,2,2])
 with col1:
-    tid = st.selectbox(
+    unit_id = st.selectbox(
         "단원을 선택해주세요",
-        topics,
+        units,
         index = None,
         placeholder = "단원명",
         )
 
-if tid:
+if unit_id:
     # 문제 리스트 db에서 가져오기. 지금은 임의로 입력한 값 사용.
-    # problems = db.get_problems(tid, sid)
-    for item in range(len(problems['qid'])):
+    # problems = db.get_problems(unit_id, student_id)
+    for item in range(len(problems['problem_id'])):
         if item < 5:
             with col2:
                 app.question_buttons(problems, item)
