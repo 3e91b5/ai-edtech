@@ -2,11 +2,15 @@ import psycopg2
 import streamlit as st
 import pandas as pd
 import datetime
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
+DBPASSWORD = os.getenv("DBPASSWORD")
 def init_connection():
     #### WARNING ####
     # database password should be removed before pushing to github
-	return psycopg2.connect("host=147.47.200.145 dbname=teamdb3 user=team3 password=0 port=34543")
+	return psycopg2.connect(f"host=147.47.200.145 dbname=teamdb3 user=team3 password={DBPASSWORD} port=34543")
 	
 def run_query(query):
     print(datetime.datetime.now(), 'run query:',  query)

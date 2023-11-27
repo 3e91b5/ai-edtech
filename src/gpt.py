@@ -1,16 +1,16 @@
 import requests
 from openai import OpenAI
 import datetime
+import os
+from dotenv import load_dotenv
+
 
 # migration guide: https://github.com/openai/openai-python/discussions/742
 
-api_key = ''    
 #### WARNING ####
 # api key should be removed before pushing to github
-
-def save_apikey(apikey):
-    global api_key
-    api_key = apikey
+load_dotenv()
+GPTPASSWORD = os.getenv("GPTPASSWORD")
 
 def get_ocr(url):
     client = OpenAI(
