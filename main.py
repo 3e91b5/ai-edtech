@@ -39,7 +39,7 @@ def add_app(self, title, function):
 		"title": title,
 		"function": function
 	})
-
+'''
 # callback function for submit button to write log
 def submit_callback(button_name):
     if button_name == '로그인' and student_id == "" and password == "":
@@ -120,4 +120,4 @@ else: # if logged in
     # st.button('로그아웃', on_click=logout_callback()) #왜 안되냐
     
 
-    
+'''
