@@ -104,7 +104,7 @@ def update_user_password(student_id, new_password):
 ##### student info #####
 # school grade (학년)
 def get_student_grade(student_id):
-	query = f"SELECT grade FROM student_db.students WHERE student_id = '{student_id}'"
+	query = f"SELECT grade FROM student_db.students WHERE student_id = 12345678"
 	result = run_query(query)
 	if result.empty:
 		return False
