@@ -12,17 +12,17 @@ icon = 'person-circle'
 is_section = true
 
 [[pages]]
+path = "pages/performance.py"
+name = "Performance"
+'''
+[[pages]]
 path = "pages/info.py"
 name = "Info"
 
 [[pages]]
-path = "pages/performance.py"
-name = "Performance"
-
-[[pages]]
 path = "pages/admin.py"
 name = "Admin"
-
+'''
 [[pages]]
 name = "Math Drill"
 icon = 'trophy-fill'
@@ -39,9 +39,10 @@ name = "Question"
 [[pages]]
 path = "pages/graded.py"
 name = "Graded result"
-
+'''
 [[pages]]
 path = "pages/chatbot.py"
 name = "Chat with AI"
 icon = 'person-plus-fill'
 is_section = true
+'''
