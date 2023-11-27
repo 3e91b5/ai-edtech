@@ -3,12 +3,12 @@
 [[pages]]
 path = "main.py"
 name = "Home"
-icon = 'house-fill'
+icon = ':classical_building:'
 is_section = true
 
 [[pages]]
 name = "My Page"
-icon = 'person-circle'
+icon = ':information_desk_person:'
 is_section = true
 
 [[pages]]
@@ -43,5 +43,5 @@ name = "Graded result"
 [[pages]]
 path = "pages/chatbot.py"
 name = "Chat with AI"
-icon = 'person-plus-fill'
+icon = ':question:'
 is_section = true

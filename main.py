@@ -3,11 +3,8 @@ from streamlit_option_menu import option_menu
 from streamlit_extras.switch_page_button import switch_page 
 import datetime
 import pandas as pd
-import time
-
 import src.db as db
-import pages.menu as menu, pages.practice as practice, pages.graded as graded, pages.performance as performance
-
+import pages.menu as menu, pages.practice as practice, pages.graded as graded, pages.performance as performance, pages.info as info, pages.admin as admin, pages.signup as signup, pages.chatbot as chatbot
 from st_pages import show_pages_from_config, add_page_title
 add_page_title()
 show_pages_from_config()
@@ -36,7 +33,6 @@ if 'login' not in st.session_state: # should be changed to more clever way
 def __init__(self):
 	self.apps = []
 	
-		
 def add_app(self, title, function):
 	self.apps.append({
 		"title": title,
@@ -120,6 +116,3 @@ else: # if logged in
         switch_page('main')
     
     # st.button('로그아웃', on_click=logout_callback()) #왜 안되냐
-    
-
-    

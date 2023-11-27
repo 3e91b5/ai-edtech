@@ -24,9 +24,9 @@ history['timestamp'] = history['timestamp'].astype(str)
 history = db.get_all_score(student_id) 
 today = history[history['timestamp'] == dt]
 history = pd.pivot_table(
-   history,
-   index=['timestamp'],
-   aggfunc={'total_score': np.sum, 'ID': len}
+    history,
+    index=['timestamp'],
+    aggfunc={'total_score': np.sum, 'ID': len}
 ).rename(columns={'ID': 'count'})
 history['week'] = history['timestamp'].isocalendar()[1]
 week = history[history['week'] == dt.isocalendar()[1]][['timestamp','count']]
