@@ -2,6 +2,9 @@ import streamlit as st
 from streamlit_extras.switch_page_button import switch_page 
 import src.db as db
 import datetime
+from st_pages import show_pages_from_config, add_page_title
+add_page_title()
+show_pages_from_config()
 
 # def app():
 
@@ -30,7 +33,7 @@ else:
     st.write("이미 로그인중입니다.")
     clicked = st.button("Go to main page")
     if clicked:
-        switch_page("main")
+        switch_page('main')
 
 
 

@@ -36,3 +36,9 @@ def get_ocr(url):
     ],
     )
     return completion.choices[0].message.content
+
+def scored(answer):
+    # input은 latex 답안
+    # db에 채점 결과 넣는 것 까지. return 따로 없음.
+    # db.update_solved(problem_id, student_id, score, ocr_solved)
+    return True
