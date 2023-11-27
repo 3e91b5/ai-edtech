@@ -38,8 +38,7 @@ st.markdown(
 )
 
 ### 변수 가져오기
-#problem_id = st.session_state['problem_id']
-problem_id = 12345678
+problem_id = st.session_state['problem_id']
 problem = db.get_selected_problem(problem_id)
 
 ### 화면 구성
