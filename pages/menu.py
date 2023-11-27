@@ -9,7 +9,7 @@ show_pages_from_config()
 
 ### 변수 가져오기
 student_id = 12345678
-grade = db.get_student_grade(student_id)[0]
+grade = db.get_student_grade(student_id)
 st.write(f'grade is {grade}')
 units = db.get_units(grade)
 
