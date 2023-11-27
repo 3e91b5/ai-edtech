@@ -46,7 +46,7 @@ selected = option_menu(None, ["학습메뉴", "모르겠어요", "제출하기"]
     icons=['house', 'emoji-frown', 'cloud-upload'],
     menu_icon="cast", default_index=0, orientation="horizontal")
 
-st.subheader("문제 번호: "+problem_id)
+st.subheader("문제 번호: "+"problem_id")
 st.latex(r'''
     problem['question']
 ''')
