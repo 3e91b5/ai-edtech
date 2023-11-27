@@ -177,7 +177,7 @@ def get_average_score(student_id):
 ##### 문제 풀이 페이지 구현 #####
 # 학년별 list of units 
 def get_units(grade):
-	query = f"SELECT unit_id FROM knowledge_map_db.units WHERE grade = '{grade}'"
+	query = f"SELECT unit_id FROM knowledge_map_db.sub_unit WHERE grade = '{grade}'"
 	result = run_query(query)
 	if result.empty:
 		return False
