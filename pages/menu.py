@@ -8,7 +8,7 @@ add_page_title()
 show_pages_from_config()
 
 ### 변수 가져오기
-student_id = st.session_state['student_id']
+student_id = 12345678 # st.session_state['student_id']
 grade = db.get_student_grade(student_id)
 units = db.get_units(grade)
 

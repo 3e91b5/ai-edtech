@@ -28,9 +28,9 @@ st.markdown('''
 )
  
 ### 변수 가져오기
-problem_id = st.session_state['problem_id']
-student_id = st.session_state['student_id']
-name = st.session_state['name']
+problem_id = 1 # st.session_state['problem_id']
+student_id = 12345678 # st.session_state['student_id']
+name = '홍길동' # st.session_state['name']
 answer = db.get_solution(problem_id)
 solved_answer = db.get_answer(problem_id, student_id)
 

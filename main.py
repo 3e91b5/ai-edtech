@@ -3,11 +3,8 @@ from streamlit_option_menu import option_menu
 from streamlit_extras.switch_page_button import switch_page 
 import datetime
 import pandas as pd
-import time
-
 import src.db as db
-import pages.menu as menu, pages.practice as practice, pages.graded as graded, pages.performance as performance
-
+import pages.menu as menu, pages.practice as practice, pages.graded as graded, pages.performance as performance, pages.info as info, pages.admin as admin, pages.signup as signup, pages.chatbot as chatbot
 from st_pages import show_pages_from_config, add_page_title
 add_page_title()
 show_pages_from_config()
@@ -17,29 +14,24 @@ st.set_page_config(
     initial_sidebar_state = "auto",
     
 )
-# session state (test)
-if 'problem_id' not in st.session_state:
-	st.session_state['problem_id'] = 1 
-
-if 'student_id' not in st.session_state:
-	st.session_state['student_id'] = 12345678
 
 # session state initialization
 if 'login' not in st.session_state: # should be changed to more clever way
 	print(datetime.datetime.now(), "init session state")
 	st.session_state['login'] = False # whether the user is logged in or not
 	st.session_state['admin'] = False # whether the user is an admin or not
+	st.session_state['student_id'] = 12345678
+	st.session_state['problem_id'] = 1 
 
 def __init__(self):
 	self.apps = []
 	
-		
 def add_app(self, title, function):
 	self.apps.append({
 		"title": title,
 		"function": function
 	})
-'''
+
 # callback function for submit button to write log
 def submit_callback(button_name):
     if button_name == '로그인' and student_id == "" and password == "":
@@ -118,4 +110,3 @@ else: # if logged in
         switch_page('main')
     
     # st.button('로그아웃', on_click=logout_callback()) #왜 안되냐
-'''
