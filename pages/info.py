@@ -4,14 +4,14 @@ import time
 import src.db as db
 from st_pages import show_pages_from_config, add_page_title
 
-st.set_page_config(
-    page_title = "Profile",
-)
 
 
 # add_page_title()
 # show_pages_from_config()
 
+# st.set_page_config(
+#     page_title = "Profile",
+# )
 
 st.write("account page")
 # try:

@@ -19,82 +19,91 @@ st.markdown('''
 </style>''',
 unsafe_allow_html=True
 )
-if st.session_state['login'] == True:
-    # 힌트 메세지(toast) 디자인 변경
-    st.markdown(
-            """
-            <style>
-                div[data-testid=stToast] {
-                    padding:  20px 10px 40px 10px;
-                    margin: 10px 400px 200px 10px;
-                    background-color: #454545;
-                    width: 30%;
-                }
+if 'login' in st.session_state:
+    if st.session_state['login'] == True:
+        # 힌트 메세지(toast) 디자인 변경
+        st.markdown(
+                """
+                <style>
+                    div[data-testid=stToast] {
+                        padding:  20px 10px 40px 10px;
+                        margin: 10px 400px 200px 10px;
+                        background-color: #454545;
+                        width: 30%;
+                    }
 
-                [data-testid=toastContainer] [data-testid=stMarkdownContainer] > p {
-                    font-size: 15px; font-style: normal; font-weight: 400;
-                    foreground-color: #FFFFFF;
-                }
-            </style>
-            """, unsafe_allow_html=True
-    )
+                    [data-testid=toastContainer] [data-testid=stMarkdownContainer] > p {
+                        font-size: 15px; font-style: normal; font-weight: 400;
+                        foreground-color: #FFFFFF;
+                    }
+                </style>
+                """, unsafe_allow_html=True
+        )
 
-    ### 변수 가져오기
-    problem_id = 1 # st.session_state['problem_id']
-    problem = db.get_selected_problem(problem_id)
+        ### 변수 가져오기
+        problem_id = 1 # st.session_state['problem_id']
+        problem = db.get_selected_problem(problem_id)
 
-    ### 화면 구성
-    selected = None
-    selected = option_menu(None, ["문제풀기", "학습메뉴", "모르겠어요", "제출하기"], # index 0 should be this page
-        icons=['book','house', 'emoji-frown', 'cloud-upload'],
-        menu_icon="cast", default_index=0, orientation="horizontal")
+        ### 화면 구성
+        selected = None
+        selected = option_menu(None, ["문제풀기", "학습메뉴", "모르겠어요", "제출하기"], # index 0 should be this page
+            icons=['book','house', 'emoji-frown', 'cloud-upload'],
+            menu_icon="cast", default_index=0, orientation="horizontal")
 
-    st.subheader("문제 번호: "+ str(problem_id))
-    st.latex(r'''
-        problem['question']
-    ''')
-
-
-
+        st.subheader("문제 번호: "+ str(problem_id))
+        st.latex(r'''
+            problem['question']
+        ''')
 
 
 
-    st.markdown("***")
-    st.subheader("답안을 작성해주세요")
-    
-    
-    uploaded_file = st.file_uploader("Upload your answer image file (e.g. png, jpg, jpeg)")
-    if uploaded_file is not None:
-        # To read file as bytes:
-        bytes_data = uploaded_file.getvalue()
-        st.write(bytes_data)
 
-        # To convert to a string based IO:
-        stringio = StringIO(uploaded_file.getvalue().decode("utf-8"))
-        st.write(stringio)
 
-        # To read file as string:
-        string_data = stringio.read()
-        st.write(string_data)
 
-        # Can be used wherever a "file-like" object is accepted:
-        dataframe = pd.read_csv(uploaded_file)
-        st.write(dataframe)
-    
-    
-    # st.image(Image.open('answer_sample.png'))
-    
-    if selected == "학습메뉴":
-        switch_page('menu')
-    if selected == "모르겠어요":
-        st.toast("이 문제는 "+problem['hint']+" 개념을 활용해 풀 수 있어요!")
-    if selected == "제출하기":
-        '''
-        streamlit은 tabletPC 화면 상의 input 처리하는 기능이 없음 + ocr은 image url로 넣음.
-        solved = "https://market.edugorilla.com/wp-content/uploads/sites/5/2017/07/algebra-hand.png"
-        ocr_solved = gpt.get_ocr(solved)
-        gpt.scored(ocr_solved)
-        '''
-        switch_page('graded')
+        st.markdown("***")
+        st.subheader("답안을 작성해주세요")
+        
+        
+        uploaded_file = st.file_uploader("Upload your answer image file (e.g. png, jpg, jpeg)")
+        if uploaded_file is not None:
+            # To read file as bytes:
+            bytes_data = uploaded_file.getvalue()
+            st.write(bytes_data)
+
+            # To convert to a string based IO:
+            stringio = StringIO(uploaded_file.getvalue().decode("utf-8"))
+            st.write(stringio)
+
+            # To read file as string:
+            string_data = stringio.read()
+            st.write(string_data)
+
+            # Can be used wherever a "file-like" object is accepted:
+            dataframe = pd.read_csv(uploaded_file)
+            st.write(dataframe)
+        
+        
+        # st.image(Image.open('answer_sample.png'))
+        
+        if selected == "학습메뉴":
+            switch_page('menu')
+        if selected == "모르겠어요":
+            st.toast("이 문제는 "+problem['hint']+" 개념을 활용해 풀 수 있어요!")
+        if selected == "제출하기":
+            '''
+            streamlit은 tabletPC 화면 상의 input 처리하는 기능이 없음 + ocr은 image url로 넣음.
+            solved = "https://market.edugorilla.com/wp-content/uploads/sites/5/2017/07/algebra-hand.png"
+            ocr_solved = gpt.get_ocr(solved)
+            gpt.scored(ocr_solved)
+            '''
+            switch_page('graded')
+    else:
+        st.write("로그인이 필요합니다.")
+        clicked = st.button("main")
+        if clicked:
+            switch_page("main")
 else:
-    switch_page("main")
+    st.write("로그인이 필요합니다.")
+    clicked = st.button("main")
+    if clicked:
+        switch_page("main")
