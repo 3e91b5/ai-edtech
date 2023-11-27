@@ -41,3 +41,29 @@ def run_gpt(messages, client):
     completion = client.chat.completions.create(model='gpt-3.5-turbo', messages=messages)
     response = completion.choices[0].message.content
     return response
+
+def run_gpt_handwritten(url, client):
+    completion = client.chat.completions.create(
+    model="gpt-4-vision-preview",
+    messages=[
+        {
+        "role": "user", 
+        "content": [
+            {"type": "text", "text": "This is a handwritten answer to a math problem. Encode it into LATEX."},
+            {
+                "type": "image_url",
+                "image_url": {
+                "url": url,
+                },
+            }
+        ],
+        }
+    ],
+    )
+    return completion.choices[0].message.content
+
+def scored(answer):
+    # input은 latex 답안
+    # db에 채점 결과 넣는 것 까지. return 따로 없음.
+    # db.update_solved(problem_id, student_id, score, ocr_solved)
+    return True

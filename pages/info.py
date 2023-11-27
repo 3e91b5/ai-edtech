@@ -8,6 +8,9 @@ st.set_page_config(
     page_title = "Profile",
 )
 
+from st_pages import show_pages_from_config, add_page_title
+add_page_title()
+show_pages_from_config()
 
 st.write("account page")
 try:

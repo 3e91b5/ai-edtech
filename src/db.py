@@ -201,9 +201,11 @@ def get_units(grade):
 		return result
 
 # 학생이 선택한 단원 & 학생 클래스 기준으로 list of questions 가져옴
-def get_problems(unit_id, student_id):
-	level = get_student_level(student_id)
-	query = f"SELECT problem_id FROM knowledge_map_db.problem WHERE unit_id = '{unit_id}' AND level = '{level}"
+def get_problems():
+	#def get_problems(unit_id, student_id):
+	#level = get_student_level(student_id)
+	#query = f"SELECT problem_id FROM knowledge_map_db.problem WHERE unit_id = '{unit_id}' AND level = '{level}"
+	query = f"SELECT problem_id FROM knowledge_map_db.problem"
 	result = run_query(query)
 	if result.empty:
 		return False
@@ -236,11 +238,11 @@ def get_answer(problem_id, student_id):
 		return False
 	else:
 		return result
-
-# # neo4j (지식요소 겹치는 문제들 연결 - 같은 단원 내로 한정)
-# def get_related_problems(qid):
-# 	query = f"MATCH ({qid : $qid})-[*]-(connected) RETURN connected"
-# 	return 
+'''
+# neo4j (지식요소 겹치는 문제들 연결 - 같은 단원 내로 한정)
+def get_related_problems(qid):
+	query = f"MATCH ({qid : $qid})-[*]-(connected) RETURN connected"
+	return 
 
 # # neo4j (역량요소별로.. 배점 제일 높은 문제들 연결)
 # def get_capacity_problems(cid):
@@ -270,7 +272,7 @@ def recommend_problem(unit_id, student_id, problem_id):
 		return False
 	
 	return nqid
-
+'''
 ##### 풀이 현황 업데이트 #####
 # 각 문제를 학생이 기존에 푼적 있는지 여부 확인
 def get_history(list, student_id): 
@@ -309,7 +311,7 @@ def update_unit_score(unit_id, student_id):
 		return False
 	else:
 		return True
-
+'''
 # update competence db -> 수정 필요. competence의 initial value = 0
 def update_competence(student_id, problem_id):
 	# 방금 푼 문제 -> competence element 배점 확인
@@ -341,3 +343,4 @@ def update_competence(student_id, problem_id):
 def update_knowledge(student_id, knowledge):
 
 	return 
+'''

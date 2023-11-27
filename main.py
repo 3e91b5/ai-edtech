@@ -8,7 +8,9 @@ import time
 import src.db as db
 import pages.menu as menu, pages.practice as practice, pages.graded as graded, pages.performance as performance
 
-
+from st_pages import show_pages_from_config, add_page_title
+add_page_title()
+show_pages_from_config()
 
 st.set_page_config(
     page_title = "AI-EdTech",
@@ -41,47 +43,29 @@ def add_app(self, title, function):
 		"function": function
 	})
 
-# with st.sidebar:
-# 	app = option_menu(
-# 	menu_title = 'Menu',
-# 	options=['Home', 'Problem-sets', 'Account', 'Sign-up'],
-# 	icons=['house-fill', 'trophy-fill', 'person-circle', 'person-plus-fill'],
-# 	menu_icon='chat-text-fill',
-# 	default_index=1,
-# 	styles={
-# 		"container": {"padding": "5!important", "background-color": 'gray'},
-# 		"icon": {"color": "white", "font-size": "23px"},
-# 		"nav-link": {"color": "white", "font-size": "20px", "text-align": "left", "margin": "0px"},
-# 		"nav-link-selected": {"background-color": "#02ab21"},}
-# 		)
-
 # callback function for submit button to write log
 def submit_callback(button_name):
-    if button_name == '로그인' and sid == "" and password == "":
+    if button_name == '로그인' and student_id == "" and password == "":
         pass
     else:
-        print(datetime.datetime.now(), button_name,"submitted", sid, password)
+        print(datetime.datetime.now(), button_name,"submitted", student_id, password)
 
 def logout_callback():
     print(datetime.datetime.now(), 'logout callback')
     session_state_reset()
 
-
-
 # TODO: main page contents
 st.title("AI-EdTech")
 st.header("My header")
 st.subheader("My subheader")
-link = '[GitHub](https://github.com/jean-jsj/ai-edtech/tree/jhkim)'
-st.markdown(link, unsafe_allow_html=True)
-# st.link_button("Github", "https://github.com/jean-jsj/ai-edtech/tree/jhkim")
+link = '[GitHub](https://github.com/jean-jsj/ai-edtech/tree/jwhong)'
 
 # the main page
 if st.session_state["login"] == False:	# if not logged in
 	# login box
 	with st.form("home"):
 			st.write("Login Page")
-			sid = st.text_input('ID:', autocomplete="on", placeholder="아이디 입력", max_chars=10)
+			student_id = st.text_input('ID:', autocomplete="on", placeholder="아이디 입력", max_chars=10)
 			password = st.text_input('Password:', type='password', placeholder="비밀번호 입력", max_chars=4)			
 			submitted = st.form_submit_button("로그인", on_click=submit_callback('로그인'))
     
@@ -96,15 +80,15 @@ if st.session_state["login"] == False:	# if not logged in
 			# 4. switch page to account page (default page)
 
 			if submitted:
-				if sid and password:
+				if student_id and password:
 					
-					login = db.login_user(sid,password)
+					login = db.login_user(student_id,password)
 					if login:
 						st.session_state['login'] = True
-						st.session_state['sid'] = sid
-						if db.is_admin(sid):
+						st.session_state['student_id'] = student_id
+						if db.is_admin(student_id):
 							st.session_state['admin'] = True
-						st.success("로그인 중.")
+						st.success("로그인 중")
     
 						# progress bar
 						# progress_text = "Please wait."
@@ -129,7 +113,7 @@ if st.session_state["login"] == False:	# if not logged in
 else: # if logged in
     
 	# show login status
-    st.write("로그인 중", "ID:", st.session_state["sid"])
+    st.write("로그인 중", "ID:", st.session_state["student_id"])
 	# show logout button
     if st.button('로그아웃'):
         logout_callback()

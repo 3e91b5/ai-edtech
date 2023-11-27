@@ -1,9 +1,13 @@
 import streamlit as st
 import src.gpt as gpt
 from streamlit_extras.switch_page_button import switch_page
+from st_pages import show_pages_from_config, add_page_title
 import random
 import time
 import openai as OpenAI
+add_page_title()
+show_pages_from_config()
+
 
 def get_apikey():
     return st.session_state["api_key"]

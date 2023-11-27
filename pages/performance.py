@@ -5,6 +5,9 @@ import pandas as pd
 import numpy as np
 now = datetime.now()
 dt = now.strftime("%Y-%m-%d")
+from st_pages import show_pages_from_config, add_page_title
+add_page_title()
+show_pages_from_config()
 
 ### toy data 사용 
 data_df = pd.DataFrame(
@@ -86,7 +89,7 @@ with column1:
     )
 with column2:
     st.subheader('얼마나 많이 풀었나요?')
-    st.line_chart(week.rename(columns={'timestamp':'index'}).set_index('index'))
+    #st.line_chart(week.rename(columns={'timestamp':'index'}).set_index('index'))
 st.markdown('***')
 
 st.header("월별 학습 현황")

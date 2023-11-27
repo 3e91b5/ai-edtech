@@ -1,6 +1,9 @@
 import streamlit as st
 from streamlit_extras.switch_page_button import switch_page
 import src.db as db
+from st_pages import show_pages_from_config, add_page_title
+add_page_title()
+show_pages_from_config()
 
 
 st.set_page_config(
@@ -42,7 +45,9 @@ try:
         st.write("로그인이 필요합니다.")
         clicked = st.button('Go to main page')
         if clicked:
-            switch_page("main")
+            switch_page('main')
+        
+    # switch_page("main")
 
         # switch_page("main")
 except Exception as e:
