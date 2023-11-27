@@ -6,7 +6,7 @@ import pandas as pd
 import time
 
 import src.db as db
-# import pages.problemset as problemset, pages.account as account, pages.signup as signup
+import pages.menu as menu, pages.practice as practice, pages.graded as graded, pages.performance as performance
 
 
 

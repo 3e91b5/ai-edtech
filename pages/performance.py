@@ -2,10 +2,11 @@ import streamlit as st
 from streamlit_calendar import calendar
 from datetime import datetime
 import pandas as pd
+import numpy as np
 now = datetime.now()
 dt = now.strftime("%Y-%m-%d")
 
-### toy data 사용 (score: 성적, completion: 주어진 문제 중 몇 %를 풀었는지)
+### toy data 사용 
 data_df = pd.DataFrame(
     {
         "question": ['Q101','Q102','Q103','Q104','Q105'],
@@ -14,7 +15,20 @@ data_df = pd.DataFrame(
 )
 
 history = pd.read_excel('history.xlsx')
-history['date'] = history['date'].astype(str)
+#history['week'] = history['timestamp'].dt.isocalendar().week
+history['timestamp'] = history['timestamp'].astype(str)
+'''
+history = db.get_all_score(student_id) 
+today = history[history['timestamp'] == dt]
+history = pd.pivot_table(
+   history,
+   index=['timestamp'],
+   aggfunc={'total_score': np.sum, 'ID': len}
+).rename(columns={'ID': 'count'})
+history['week'] = history['timestamp'].isocalendar()[1]
+week = history[history['week'] == dt.isocalendar()[1]][['timestamp','count']]
+
+'''
 
 ### 좌측 상단 progress bar 디자인 변경
 st.markdown(
@@ -37,18 +51,16 @@ calendar_options = {
 }
 calendar_events = []
 for i in range(len(history)):
-    # completion rate가 50% 미만이면 옅은 회색, 50% 이상이면 진한 회색으로 표기
-    if history['completion'][i] < 0.5:
+    # 푼 문항 수가 n개 (기준 임의로 설정?) 이상이면 진한 회색, 미만이면 옅은 회색
+    if history['count'][i] < 5:
         color = "#808080"
     else:
         color = "#36454F"
-    if history['date'][i] == dt:
-        progress = history['completion'][i]
 
     dict = {
-        "title": '성취도: {0}%'.format(history['score'][i]),
-        "start": history['date'][i],
-        "end": history['date'][i],
+        "title": '성취도: {0}%'.format(history['total_score'][i]),
+        "start": history['timestamp'][i],
+        "end": history['timestamp'][i],
         "color": color,
     }    
     calendar_events.append(dict)
@@ -58,16 +70,12 @@ st.header('오늘의 학습 현황')
 column1, padding, column2 = st.columns((10,2,10))
 
 with column1:
-    st.subheader('얼마나 많이 풀었나요?')
-    progress_percent = progress * 100
-    st.progress(progress, text = f"{progress_percent}%")
-with column2:
     st.subheader('얼마나 정확하게 풀었나요?')
     st.data_editor(
-    data_df,
+    data_df, # data_df -> today로 수정 
     column_config={
-        "question": "문항 번호",
-        "score": st.column_config.ProgressColumn(
+        "question": "문항 번호", # question -> problem_id로 수정
+        "score": st.column_config.ProgressColumn( # score -> total_score로 수정
             "문항별 점수 (100점 만점)",
             format="%f",
             min_value=0,
@@ -76,7 +84,9 @@ with column2:
     },
     hide_index=True,
     )
-
+with column2:
+    st.subheader('얼마나 많이 풀었나요?')
+    st.line_chart(week.rename(columns={'timestamp':'index'}).set_index('index'))
 st.markdown('***')
 
 st.header("월별 학습 현황")

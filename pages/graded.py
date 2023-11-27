@@ -24,13 +24,13 @@ st.markdown('''
 )
  
 # 임의의 값 사용
-qid = "Q101"
-sid = "A100"
+problem_id = "Q101"
+student_id = "A100"
 name = "홍길동"
-answer = db.get_solution(qid)
-solved_answer = db.get_solved(qid, sid)
+answer = db.get_solution(problem_id)
+solved_answer = db.get_solved(problem_id, student_id)
 '''
-sid = st.session_state['sid']
+student_id = st.session_state['student_id']
 name = st.session_state['name']
 '''
 ### 화면 구성
@@ -38,7 +38,7 @@ selected = option_menu(None, ["학습메뉴", "챗봇과 얘기하기", "다음 
     icons=['house', 'chat', 'arrow-right-square'],
     menu_icon="cast", default_index=0, orientation="horizontal")
 
-st.subheader("문제 번호: "+qid)
+st.subheader("문제 번호: "+problem_id)
 # db에서 가져온 문제 입력. 아래는 임의로 입력한 값.
 st.latex(r'''
     \text{공정한 6면 주사위를 5번 던집니다. 2번 이하로 6이 나올 확률은 얼마인가요?}
@@ -75,5 +75,5 @@ if selected == "학습메뉴":
 if selected == "챗봇과 얘기하기":
     switch_page("chatbot")
 if selected == "다음 문제로 이동":
-    #st.session_state['qid'] = recommend_problem(tid, sid, qid):
+    #st.session_state['problem_id'] = recommend_problem(unit_id, student_id, problem_id):
     switch_page("problem")
