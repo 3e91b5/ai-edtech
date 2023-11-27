@@ -1,9 +1,17 @@
 from openai import OpenAI
 import streamlit as st
+from st_pages import show_pages_from_config, add_page_title
 
+# add_page_title()
+# show_pages_from_config()
 st.title("ChatGPT-like clone")
 
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+# clear chat_message session
+clear_message = st.button("Clear chat history")
+if clear_message:
+    st.session_state.messages = []
+
+client = OpenAI(api_key=st.secrets["apikey"])
 
 if "openai_model" not in st.session_state:
     st.session_state["openai_model"] = "gpt-3.5-turbo"

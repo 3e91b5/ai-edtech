@@ -2,8 +2,8 @@ import streamlit as st
 from streamlit_extras.switch_page_button import switch_page
 import src.db as db
 from st_pages import show_pages_from_config, add_page_title
-add_page_title()
-show_pages_from_config()
+# add_page_title()
+# show_pages_from_config()
 
 
 st.set_page_config(
@@ -17,12 +17,12 @@ try:
         if st.session_state['admin'] == True: # Admin page
             
             with st.form("delete_user"):
-                delete_id = st.text_input('Delete ID:', autocomplete="on", placeholder="아이디 입력", max_chars=10)
+                account = st.text_input('Delete ID:', autocomplete="on", placeholder="아이디 입력", max_chars=10)
                 submitted = st.form_submit_button("Delete user")
                 if submitted:
-                    success = db.delete_user(delete_id)
+                    success = db.delete_user(account)
                     if success: 
-                        st.success(f"User '{delete_id}' deleted")
+                        st.success(f"User '{account}' deleted")
                     else:
                         st.error("User not found")
                 
@@ -54,6 +54,6 @@ except Exception as e:
     switch_page("main")
 
 
-def delete_user(sid):
-    return db.delete_user(sid)
+def delete_user(account):
+    return db.delete_user(account)
     

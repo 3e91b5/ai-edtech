@@ -3,18 +3,17 @@ import streamlit as st
 import pandas as pd
 import datetime
 import os
-from dotenv import load_dotenv, find_dotenv
 
-load_dotenv(find_dotenv())
-DBPASSWORD = os.getenv("DBPASSWORD")
+
+
 def init_connection():
     # database password should be removed before pushing to github
 	connection = psycopg2.connect(
-	user = os.getenv("DATABASE_USERNAME"), 
-	password = os.getenv("DATABASE_PASSWORD"), 
-	host = os.getenv("DATABASE_IP"),                                            
-    port = os.getenv("DATABASE_PORT"),                                          
-    database = os.getenv("DATABASE_NAME")                                       
+		user = st.secrets['username'],
+		password = st.secrets['password'],
+		host = st.secrets['host'],
+		port = st.secrets['port'],
+		database = st.secrets['database']
 	)    
 	return connection
 
@@ -45,7 +44,15 @@ def run_tx(query):
 		conn.close()
 	return
 
-def get_student_info(account):
+def get_student_info(student_id):
+	query = f"SELECT * FROM student_db.students WHERE student_id = '{student_id}'"
+	result = run_query(query)
+	if result.empty:
+		return False
+	else:
+		return result
+
+def get_student_info_by_account(account):
 	query = f"SELECT * FROM student_db.students WHERE account = '{account}'"
 	result = run_query(query)
 	if result.empty:
@@ -53,30 +60,30 @@ def get_student_info(account):
 	else:
 		return result
 
-# 
-def add_user(student_id, password, name, age, grade):
-	query = f"SELECT * FROM student_db.students WHERE account = '{student_id}'"
+def add_user(account, password, name, age, grade):
+	query = f"SELECT * FROM student_db.students WHERE account = '{account}'"
 	print(datetime.datetime.now(), "check query:", query)
 	result = run_query(query)
 
 	if result.empty:
-		print(datetime.datetime.now(), "user data를 추가합니다.", student_id, password)
+		print(datetime.datetime.now(), "user data를 추가합니다.", account, password)
 		date_joined = datetime.datetime.now()
-		add_query = f"INSERT INTO student_db.students (account, password, admin, name,age, grade,date_joined) VALUES('{student_id}', '{password}', False,'{name}', '{age}', '{grade}', '{date_joined}')"
+		add_query = f"INSERT INTO student_db.students (account, password, admin, name,age, grade,date_joined) VALUES('{account}', '{password}', False,'{name}', '{age}', '{grade}', '{date_joined}')"
 
 		run_tx(add_query)
 		return True
 	else:
 		return False
 
-def login_user(student_id,password):
-	query = f"SELECT * FROM student_db.students WHERE account = '{student_id}' AND password = '{password}'"
+def login_user(account, password):
+	query = f"SELECT * FROM student_db.students WHERE account = '{account}' AND password = '{password}'"
 	result = run_query(query)
 	if result.empty:
 		return False
 	else:
 		last_login = datetime.datetime.now()
-		query = f"UPDATE student_db.students SET last_login = '{last_login}' WHERE account = '{student_id}'"
+		student_id = result['student_id'][0]
+		query = f"UPDATE student_db.students SET last_login = '{last_login}' WHERE student_id = '{student_id}'"
 		run_tx(query)
 		return True
 
@@ -86,18 +93,21 @@ def view_all_users():
 	return result
 
 def delete_user(student_id):
-	query = f"select * from student_db.students where account = '{student_id}'"
+	query = f"select * from student_db.students where student_id = '{student_id}'"
 	result = run_query(query)
 	if result.empty:
 		return False
-	query = f"DELETE FROM student_db.students WHERE account = '{student_id}'"
+	account = result['account'][0]
+	query = f"DELETE FROM student_db.students WHERE student_id = '{student_id}'"
 	run_tx(query)
-	print(datetime.datetime.now(), "delete user", student_id)
+	print(datetime.datetime.now(), "delete user", account)
 	
 	return True
 
+
+
 def is_admin(student_id):
-	query = f"SELECT admin FROM student_db.students WHERE account = '{student_id}'"
+	query = f"SELECT admin FROM student_db.students WHERE student_id = '{student_id}'"
 	result = run_query(query)
 	print(datetime.datetime.now(), "is_admin",  result['admin'][0])
 	
@@ -107,7 +117,7 @@ def is_admin(student_id):
 		return False
 
 def update_user_password(student_id, new_password):
-	query = f"UPDATE student_db.students SET password = '{new_password}' WHERE account = '{student_id}'"
+	query = f"UPDATE student_db.students SET password = '{new_password}' WHERE student_id = '{student_id}'"
 	result = run_tx(query)
 	if result.empty:
 		return False
@@ -132,7 +142,7 @@ def get_student_grade(student_id):
 	if result.empty:
 		return False
 	else:
-		return result
+		return result['grade'][0]
 
 # 상/중/하 클래스
 def get_student_level(student_id):
@@ -239,7 +249,8 @@ def get_solution(problem_id):
 
 # 채점결과 페이지 구현시 학생 답안 가져오기
 def get_answer(problem_id, student_id):
-	query = f"SELECT student_answer, step_score, total_score FROM knowledge_map_db.problem_progress WHERE problem_id = '{problem_id}' and student_id = '{student_id}'"
+	# query = f"SELECT student_answer, step_score, total_score FROM knowledge_map_db.problem_progress WHERE problem_id = '{problem_id}' and student_id = '{student_id}' "
+	query = f"SELECT student_answer, step_score, total_score FROM student_db.problem_progress WHERE problem_id = '{problem_id}' and student_id = '{student_id}' "
 	result = run_query(query)
 	if result.empty:
 		return False

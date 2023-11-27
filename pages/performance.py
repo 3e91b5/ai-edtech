@@ -3,11 +3,12 @@ from streamlit_calendar import calendar
 from datetime import datetime
 import pandas as pd
 import numpy as np
+import src.db as db
 now = datetime.now()
 dt = now.strftime("%Y-%m-%d")
 from st_pages import show_pages_from_config, add_page_title
-add_page_title()
-show_pages_from_config()
+# add_page_title()
+# show_pages_from_config()
 
 ### toy data 사용 
 data_df = pd.DataFrame(
@@ -17,21 +18,20 @@ data_df = pd.DataFrame(
     }
 )
 
-history = pd.read_excel('history.xlsx')
-#history['week'] = history['timestamp'].dt.isocalendar().week
-history['timestamp'] = history['timestamp'].astype(str)
-'''
+
+### 변수 가져오기
+student_id =  st.session_state['student_id']
 history = db.get_all_score(student_id) 
 today = history[history['timestamp'] == dt]
+st.write(today)
 history = pd.pivot_table(
     history,
     index=['timestamp'],
     aggfunc={'total_score': np.sum, 'ID': len}
-).rename(columns={'ID': 'count'})
+).rename(columns={'ID': 'count'}) # why error here? error said "Column ['ID'] do not exist."
 history['week'] = history['timestamp'].isocalendar()[1]
 week = history[history['week'] == dt.isocalendar()[1]][['timestamp','count']]
-
-'''
+# history['timestamp'] = history['timestamp'].astype(str)
 
 ### 좌측 상단 progress bar 디자인 변경
 st.markdown(

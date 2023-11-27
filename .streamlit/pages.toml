@@ -2,7 +2,7 @@
 
 [[pages]]
 path = "main.py"
-name = "Home"
+name = "main"
 icon = ':classical_building:'
 is_section = true
 
@@ -45,3 +45,7 @@ path = "pages/chatbot.py"
 name = "Chat with AI"
 icon = ':question:'
 is_section = true
+
+[[pages]]
+path = "pages/chatbot_gptexample.py"
+name = "chatbot_gptexample(demo)"

@@ -21,7 +21,7 @@ def run_gpt_helloworld():
 	)
     messages = [
         {'role':"assistant", 'content':"You are professional mathematics teacher. As a good and kind teacher, you are teaching a student who is struggling with math. The student is asking you a question. Please answer the question."},
-        {"role": "user", "content": f"Hello. I am {st.session_state['sid']}!. Can you introduce yourself using 1 sentence?"}, # this prompt should be improved
+        {"role": "user", "content": f"Hello. I am {st.session_state['student_id']}!. Can you introduce yourself using 1 sentence?"}, # this prompt should be improved
     ]
     completion = client.chat.completions.create(model='gpt-3.5-turbo', messages=messages)
     response = completion.choices[0].message.content

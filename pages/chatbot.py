@@ -5,8 +5,8 @@ from st_pages import show_pages_from_config, add_page_title
 import random
 import time
 import openai as OpenAI
-add_page_title()
-show_pages_from_config()
+# add_page_title()
+# show_pages_from_config()
 
 
 def get_apikey():
@@ -58,15 +58,18 @@ try:
         
 
         
-        # clear chat_message session
-        clear_message = st.button("Clear chat history")
-        if clear_message:
-            st.session_state.messages = []
+
         
         
         
         # interactive chatbot example
         st.title("Simple Chat")
+        
+        # clear chat_message session
+        clear_message = st.button("Clear chat history")
+        if clear_message:
+            st.session_state.messages = []
+        
         # Initialize chat history
         if "messages" not in st.session_state:
             st.session_state.messages = []
