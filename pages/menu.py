@@ -10,6 +10,7 @@ show_pages_from_config()
 ### 변수 가져오기
 student_id = 12345678 # st.session_state['student_id']
 grade = db.get_student_grade(student_id)
+st.write(f'grade is {grade}')
 units = db.get_units(grade)
 
 ### 화면 구성
