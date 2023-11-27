@@ -44,11 +44,11 @@ def submit_callback(button_name):
         print(datetime.datetime.now(), button_name,"submitted", student_id, password)
 
 def logout_callback():
-    print(datetime.datetime.now(), 'logout callback')
-    st.session_state['login'] = False
-    st.session_state['student_id'] = None
+	print(datetime.datetime.now(), 'logout callback')
+	st.session_state['login'] = False
+	st.session_state['student_id'] = None
 	st.session_state['problem_id'] = None
-    st.session_state['admin'] = False
+	st.session_state['admin'] = False
 
 # TODO: main page contents
 st.title("AI-EdTech")
