@@ -21,7 +21,8 @@ st.set_page_config(
 # session state initialization
 if 'login' not in st.session_state: # should be changed to more clever way
 	print(datetime.datetime.now(), "init session state")
-	st.session_state['student_id'] = None # name of the student
+	st.session_state['student_id'] = 12345678 
+	st.session_state['problem_id'] = 1 
 	st.session_state['login'] = False # whether the user is logged in or not
 	st.session_state['admin'] = False # whether the user is an admin or not
 
@@ -46,6 +47,7 @@ def logout_callback():
     print(datetime.datetime.now(), 'logout callback')
     st.session_state['login'] = False
     st.session_state['student_id'] = None
+	st.session_state['problem_id'] = None
     st.session_state['admin'] = False
 
 # TODO: main page contents
