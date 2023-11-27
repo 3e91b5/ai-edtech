@@ -111,7 +111,7 @@ def get_student_grade(student_id):
 	else:
 		return result
 
-# 상/중/하 클래스
+# 상/중/하 클래스 -> level 없음 db에
 def get_student_level(student_id):
 	query = f"SELECT level FROM student_db.students WHERE student_id = '{student_id}'"
 	result = run_query(query)

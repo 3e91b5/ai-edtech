@@ -9,9 +9,8 @@ show_pages_from_config()
 
 ### 변수 가져오기
 grade = db.get_student_grade(12345678)
-level = db.get_student_level(12345678)
 score = db.get_score(12345678, 1)
-st.write(f'grade is {level}')
+st.write(f'grade is {grade}')
 st.write(f'grade is {score}')
 units = db.get_units(grade)
 
