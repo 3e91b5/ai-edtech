@@ -39,7 +39,7 @@ try:
             
                 
 except Exception as e:
-    st.write(e)
+    # st.write(e)
     st.write("로그인이 필요합니다.")
     clicked = st.button('Go to main page')
     if clicked:
