@@ -3,8 +3,6 @@ from openai import OpenAI
 import streamlit as st
 import datetime
 
-# migration guide: https://github.com/openai/openai-python/discussions/742
-
 
 def set_apikey(apikey):
 
@@ -23,7 +21,7 @@ def run_gpt_helloworld():
 	)
     messages = [
         {'role':"assistant", 'content':"You are professional mathematics teacher. As a good and kind teacher, you are teaching a student who is struggling with math. The student is asking you a question. Please answer the question."},
-        {"role": "user", "content": "Hello, can you introduce yourself using 1 sentence?"}, # this prompt should be improved
+        {"role": "user", "content": f"Hello. I am {st.session_state['sid']}!. Can you introduce yourself using 1 sentence?"}, # this prompt should be improved
     ]
     completion = client.chat.completions.create(model='gpt-3.5-turbo', messages=messages)
     response = completion.choices[0].message.content
@@ -31,7 +29,7 @@ def run_gpt_helloworld():
     return response,  client
     
 # get the question from student and do prompt engineering for gpt
-def prompt(question):
+def default_prompt(question):
     messages = [
         {'role':"assistant", 'content':"You are professional mathematics teacher. As a good and kind teacher, you are teaching a student who is struggling with math. The student is asking you a question. Please answer the question."},
         {"role": "user", "content": question},
