@@ -7,7 +7,7 @@ import os
 
 
 def init_connection():
-    # database password should be removed before pushing to github
+	# the contents of st.secrets are in .streamlit/secrets.toml
 	connection = psycopg2.connect(
 		user = st.secrets['username'],
 		password = st.secrets['password'],
@@ -44,6 +44,21 @@ def run_tx(query):
 		conn.close()
 	return
 
+################## Table: student_db.students ##################
+# student_id: primary key
+# account: unique
+# password:
+# admin: boolean
+# name:
+# age:
+# date_joined:
+# last_login:
+# grade:
+#################################################################
+
+
+# get student info by student_id
+# result: student_id, account, password, admin, name, age, date_joined, last_login, grade
 def get_student_info(student_id):
 	query = f"SELECT * FROM student_db.students WHERE student_id = '{student_id}'"
 	result = run_query(query)
@@ -52,6 +67,8 @@ def get_student_info(student_id):
 	else:
 		return result
 
+# get student info by account
+# result: student_id, account, password, admin, name, age, date_joined, last_login, grade
 def get_student_info_by_account(account):
 	query = f"SELECT * FROM student_db.students WHERE account = '{account}'"
 	result = run_query(query)
@@ -60,6 +77,10 @@ def get_student_info_by_account(account):
 	else:
 		return result
 
+# add user to db when user sign up
+# input: account, password, name, age, grade
+# default value: admin = False, date_joined = datetime.datetime.now(), last_login = None
+# return True if success, False if fail
 def add_user(account, password, name, age, grade):
 	query = f"SELECT * FROM student_db.students WHERE account = '{account}'"
 	print(datetime.datetime.now(), "check query:", query)
@@ -75,6 +96,8 @@ def add_user(account, password, name, age, grade):
 	else:
 		return False
 
+# check if user exists in db when user login
+# if user exists, update last_login field and return True
 def login_user(account, password):
 	query = f"SELECT * FROM student_db.students WHERE account = '{account}' AND password = '{password}'"
 	result = run_query(query)
@@ -87,11 +110,15 @@ def login_user(account, password):
 		run_tx(query)
 		return True
 
+# admin function for viewing all users
 def view_all_users():
 	query = 'SELECT * FROM student_db.students'
 	result = run_query(query)
 	return result
 
+# admin function for deleting user
+#### WARNING ####
+# this function does not have double check for deleting user
 def delete_user(student_id):
 	query = f"select * from student_db.students where student_id = '{student_id}'"
 	result = run_query(query)
@@ -104,8 +131,7 @@ def delete_user(student_id):
 	
 	return True
 
-
-
+# check whether user is admin
 def is_admin(student_id):
 	query = f"SELECT admin FROM student_db.students WHERE student_id = '{student_id}'"
 	result = run_query(query)
@@ -116,6 +142,7 @@ def is_admin(student_id):
 	else:
 		return False
 
+# update user password
 def update_user_password(student_id, new_password):
 	query = f"UPDATE student_db.students SET password = '{new_password}' WHERE student_id = '{student_id}'"
 	result = run_tx(query)

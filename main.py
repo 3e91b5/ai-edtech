@@ -17,6 +17,8 @@ st.set_page_config(
     
 )
 
+# when the user first logs in, session_state is initialized
+# when the user logs out, session_state is reset
 def session_state_reset():
 	st.session_state['student_id'] = None
 	st.session_state['account'] = None
@@ -30,8 +32,8 @@ def session_state_reset():
 	st.session_state['message'] = []
 	st.session_state['problem_id'] = [] 
 
+# after login, session_state is initialized by student info from the database
 def session_state_login_init(account):
-    
 	student_info = db.get_student_info_by_account(account)
 	student_id = student_info['student_id'][0]
 
@@ -78,7 +80,8 @@ def logout_callback():
 st.title("AI-EdTech")
 st.header("My header")
 st.subheader("My subheader")
-link = '[GitHub](https://github.com/jean-jsj/ai-edtech/tree/jwhong)'
+link = '[GitHub](https://github.com/jean-jsj/ai-edtech/)'
+st.markdown(link, unsafe_allow_html=True)
 
 # the main page
 if st.session_state["login"] == False:	# if not logged in
@@ -93,11 +96,8 @@ if st.session_state["login"] == False:	# if not logged in
 			# 1. check whether student_id and password are not empty
 			# 2. check whether (student_id, password) pair is in the database (in funtion db.login_user)
 			# 3. if yes, 
-			#		set session_state['login'] to True, 
-			# 		session_state['student_id'] to user's student_id,
-			#		session_state['teacher'] to True if the user is a teacher, 
-			#		and session_state['admin'] to True if the user is an admin  
-			# 4. switch page to account page (default page)
+			#		initialize session_state by calling session_state_login_init(student_id)
+			# 4. switch page to info page (default page)
 
 			if submitted:
 				if account and password:
@@ -105,21 +105,9 @@ if st.session_state["login"] == False:	# if not logged in
 					login = db.login_user(account, password)
 					if login:
 						session_state_login_init(account)
-
 						st.success("로그인 중")
-    
-						# progress bar
-						# progress_text = "Please wait."
-						# my_bar = st.progress(0, text = progress_text)
-						# for percent_complete in range(100):
-						# 	time.sleep(0.01)
-						# 	my_bar.progress(percent_complete + 1, text = progress_text)
-						# my_bar.empty()
-    
-    
-						# redirect to account page after few seconds
-						time.sleep(1)
 						
+						time.sleep(1) # redirect to info page after few seconds
 						switch_page("info")
     
 					else: # if login fails
@@ -128,6 +116,8 @@ if st.session_state["login"] == False:	# if not logged in
 					st.error("모든 정보를 입력해주세요")
 	if st.button("회원가입"):
 		switch_page('signup')
+
+
 else: # if logged in
     
 	# show login status
@@ -137,4 +127,3 @@ else: # if logged in
         logout_callback()
         switch_page('main')
     
-    # st.button('로그아웃', on_click=logout_callback()) #왜 안되냐
