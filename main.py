@@ -3,7 +3,7 @@ import streamlit as st
 import time
 from streamlit_extras.switch_page_button import switch_page 
 import datetime
-# import pandas as pd
+import pandas as pd
 import src.db as db
 from st_pages import Page, Section, show_pages
 
