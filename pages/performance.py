@@ -26,16 +26,16 @@ if 'login' in st.session_state:
 
         ### 변수 가져오기
         student_id =  st.session_state['student_id']
-        # st.write('student_id: ', student_id)
+        st.write('student_id: ', student_id)
         history = db.get_all_score(student_id) 
-        # st.write('history: ', history)
+        st.write('history: ', history)
         today = history[history['timestamp'] == dt]
-        # st.write(today)
+        st.write(today)
         history = pd.pivot_table(
             history,
             index=['timestamp'],
-            aggfunc={'total_score': np.sum, 'ID': len}
-        ).rename(columns={'ID': 'count'}) # why error here? error said "Column ['ID'] do not exist."
+            aggfunc={'total_score': np.sum, 'student_id': len}
+        ).rename(columns={'student_id': 'count'}) 
         history['week'] = history['timestamp'].isocalendar()[1]
         week = history[history['week'] == dt.isocalendar()[1]][['timestamp','count']]
         # history['timestamp'] = history['timestamp'].astype(str)

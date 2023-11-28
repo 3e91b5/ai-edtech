@@ -43,20 +43,29 @@ if 'login' in st.session_state:
             menu_icon="cast", default_index=0, orientation="horizontal")
 
         st.subheader("문제 번호: "+str(problem_id))
+        # problem['question'] 들어감. 아래는 임의로 입력한 값.
         st.latex(r'''
-            problem['question']
+            \text{공정한 6면 주사위를 5번 던집니다. 2번 이하로 6이 나올 확률은 얼마인가요?}
         ''')
-        st.markdown("***")
 
+    
+        st.markdown("***")
+        # answer['solution'] 들어감. 아래는 임의로 입력한 값.
         st.subheader("정답 풀이")
         st.latex(r'''
-            answer['solution']
+        \text{정확히 2번 6이 나올 방법의 수는 }\binom{5}{2}5^3 \text{입니다.}  \\
+        \text{6이 나올 두 주사위를 고르는 방법이 }\binom{5}{2}\text{가지이고, 나머지 3개 주사위에 대해서는 각각 5가지 선택이 가능합니다.}  \\
+        \text{마찬가지로, 정확히 1번 6이 나올 방법의 수는 }\binom{5}{1}5^4\text{이며, 6이 한 번도 나오지 않는 방법의 수는 }\binom{5}{0}5^5\text{입니다.}  \\
+        \text{따라서 확률은 }\frac{\binom{5}{2}5^3+\binom{5}{1}5^4+\binom{5}{0}5^5}{6^5}=\frac{625}{648}\text{입니다.}
         ''')
         st.markdown("***")
-
-        st.subheader(f"{name}님의 답안") 
+        # solved_answer['solved'] 들어감. 아래는 임의로 입력한 값.
+        st.subheader(f"{st.session_state['name']}님의 답안")
         st.latex(r'''
-            solved_answer['student_answer']
+        \text{6이 2번 나오는 경우의 수 = }\binom{5}{2}5^3  \\
+        \text{2개 주사위에서 6 나오려면}\binom{5}{2}\text{경우의 수 and 3개 주사위에서 1 부터 5 나온다}  \\
+        \text{6이 1번 나오는 경우의 수 = }\binom{5}{1}5^4\text{, 0번 나오는 경우의 수 = }\binom{5}{0}5^5  \\
+        \text{따라서 }\frac{\binom{5}{2}5^3+\binom{5}{1}5^4+\binom{5}{0}5^5}{6^5}=\frac{625}{648}
         ''')
         st.markdown("***")
 
