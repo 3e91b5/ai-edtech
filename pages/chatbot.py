@@ -28,7 +28,7 @@ if 'login' in st.session_state:
                 submitted = st.form_submit_button("인증하기")
                 if submitted:
                     gpt.set_apikey(apikey)
-                    global gpt_client_teacher
+                    
                     reponse , st.session_state['gpt_client'] = gpt.run_gpt_helloworld()
                     st.write(reponse)
                     st.session_state['gpt_session'] = True
