@@ -12,7 +12,7 @@ if 'login' in st.session_state:
         ### 변수 가져오기
         student_id = st.session_state['student_id']
         grade = db.get_student_grade(student_id)
-        st.write(f'grade is {grade}')
+        # st.write(f'grade is {grade}')
         units = db.get_units(grade)
 
 
@@ -32,25 +32,19 @@ if 'login' in st.session_state:
             # problems = db.get_problems(unit_id, student_id)
             problems = db.get_problems()
             problems['solved'] = db.get_history(problems, student_id)
-            
             for item in range(len(problems['problem_id'])):
-                if item < 5:
+                if item < 3:
                     with col2:
                         app.question_buttons(problems, item)
-                elif (item >= 5 and item < 10):
+                elif (item >= 3 and item < 6):
                     with col3:
                         app.question_buttons(problems, item)
-                elif (item >= 10 and item < 15):
+                elif (item >= 6 and item < 9):
                     with col4:
                         app.question_buttons(problems, item)
                 else:
                     with col5:
                         app.question_buttons(problems, item)
-        
-        from PIL import Image
-        image1 = Image.open('pages/menu1.jpg')
-        st.image(image1, use_column_width=True, caption='demo1')
-        
     else:
         st.write("로그인이 필요합니다.")
         clicked = st.button("main")

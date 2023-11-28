@@ -1,65 +1,67 @@
+
 import streamlit as st
 from streamlit_calendar import calendar
-from datetime import datetime
+from datetime import datetime, date
 import pandas as pd
 import numpy as np
 import src.db as db
 import streamlit_extras.switch_page_button as switch_page
-now = datetime.now()
-dt = now.strftime("%Y-%m-%d")
-from st_pages import show_pages_from_config, add_page_title
-# add_page_title()
-# show_pages_from_config()
+ 
+### 디자인 변경
+# 좌측 상단 progress bar 디자인 변경
+st.markdown("""
+<style>
+.stProgress > div > div > div > div {
+    background-image: linear-gradient(to right, #808080 , #36454F);
+}
+</style>""",
+unsafe_allow_html=True,
+)
 
-
-
+### 화면 구성
 if 'login' in st.session_state:
     if st.session_state['login'] == True:
-        ### toy data 사용 
-        data_df = pd.DataFrame(
-            {
-                "question": ['Q101','Q102','Q103','Q104','Q105'],
-                "score": [20, 95, 55, 80, 64],
-            }
-        )
-        from PIL import Image
-        image1 = Image.open('pages/performance1.jpg')
-        st.image(image1, use_column_width=True, caption='demo1')
-        image2 = Image.open('pages/performance2.jpg')
-        st.image(image2, use_column_width=True, caption='dem21')
-        
-        ### 변수 가져오기
+
         student_id =  st.session_state['student_id']
-        # st.write('student_id: ', student_id)
-        history = db.get_all_score(student_id) 
-        # st.write('history: ', history)
-        today = history[history['timestamp'] == dt]
-        # st.write('today', today)
-        # st.write('len(history): ', len(history))
+        history = db.get_all_score(student_id)
+
+        # NOTE: datetime object is different from date object (despite both being '2023-11-27')
+        # both datetime(2023,11,27) and datetime.now() returns a datetime object
+        # both date(2023,11,27) and date.today() returns a date object
+        today = date.today()
+        now = datetime.now()
+        today = history[history['timestamp']==today][['problem_id','total_score']]
+        
         history = pd.pivot_table(
             history,
-            index=['timestamp'],
-            aggfunc={'total_score': np.sum,
-                    # 'student_id': st.session_state['student_id']
-                    },
-            # columns=['count'],
-        ).rename(columns={'student_id': 'count'}) 
-        history['week'] = history['timestamp'].isocalendar()[1]
-        week = history[history['week'] == dt.isocalendar()[1]][['timestamp','count']]
-        # history['timestamp'] = history['timestamp'].astype(str)
+            index='timestamp',
+            aggfunc={'total_score': np.mean, 'problem_id': len}
+        ).rename(columns={'problem_id': 'count'}).apply(np.ceil).round(decimals = 1) # round decimal (np.mean)
+        history.reset_index(inplace=True)
+        # NOTE: data import할 때 datetime 형식으로 데이터가 로드되지 않음. AttributeError: Can only use .dt accessor with datetimelike values
+        history['timestamp'] = pd.to_datetime(history['timestamp'], format='%Y-%m-%d')
+        history['week'] = history['timestamp'].dt.week
+  
+        conditions = [ 
+          (history['timestamp'].dt.dayofweek == 0),
+          (history['timestamp'].dt.dayofweek == 1),
+          (history['timestamp'].dt.dayofweek == 2),
+          (history['timestamp'].dt.dayofweek == 3),
+          (history['timestamp'].dt.dayofweek == 4),
+          (history['timestamp'].dt.dayofweek == 5),
+          (history['timestamp'].dt.dayofweek == 6)
+          ]
 
-        ### 좌측 상단 progress bar 디자인 변경
-        st.markdown(
-            """
-            <style>
-                .stProgress > div > div > div > div {
-                    background-image: linear-gradient(to right, #808080 , #36454F);
-                }
-            </style>""",
-            unsafe_allow_html=True,
-        )
+        values = ['Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat', 'Sun']
+        history['Day of Week'] = np.select(conditions, values)
 
-        ### calendar detail
+        # NOTE: now는 datetime object라 isocalendar()로 week number 계산. now.week하면 AttributeError: 'datetime.datetime' object has no attribute 'week'
+        week = history[history['week'] == now.isocalendar()[1]][['Day of Week','count']]
+        week.set_index("Day of Week", inplace = True)
+
+        # NOTE: streamlit-calendar에선 날짜를 string 타입으로 넣어야 함
+        history['timestamp'] = history['timestamp'].astype(str)
+
         calendar_options = {
             "headerToolbar": {
                 "left": "today",
@@ -68,43 +70,42 @@ if 'login' in st.session_state:
             },
         }
         calendar_events = []
-        for i in range(len(history)):
-            # 푼 문항 수가 n개 (기준 임의로 설정?) 이상이면 진한 회색, 미만이면 옅은 회색
+        for i in range(len(history['timestamp'])):
+            # 푼 문항 수가 n개 이상이면 진한 회색, 미만이면 옅은 회색
             if history['count'][i] < 5:
                 color = "#808080"
             else:
                 color = "#36454F"
 
             dict = {
-                "title": '성취도: {0}%'.format(history['total_score'][i]),
+                "title": '성적: {0}/10점'.format(history['total_score'][i]),
                 "start": history['timestamp'][i],
                 "end": history['timestamp'][i],
                 "color": color,
-            }    
+            }
             calendar_events.append(dict)
 
-        ### 화면 구성
         st.header('오늘의 학습 현황')
         column1, padding, column2 = st.columns((10,2,10))
 
         with column1:
             st.subheader('얼마나 정확하게 풀었나요?')
             st.data_editor(
-            data_df, # data_df -> today로 수정 
+            today, 
             column_config={
-                "question": "문항 번호", # question -> problem_id로 수정
-                "score": st.column_config.ProgressColumn( # score -> total_score로 수정
-                    "문항별 점수 (100점 만점)",
+                "problem_id": "문항 번호", 
+                "total_score": st.column_config.ProgressColumn( 
+                    "문항별 점수 (10점 만점)",
                     format="%f",
                     min_value=0,
-                    max_value=100,
+                    max_value=10,
                 ),
             },
             hide_index=True,
             )
         with column2:
             st.subheader('얼마나 많이 풀었나요?')
-            #st.line_chart(week.rename(columns={'timestamp':'index'}).set_index('index'))
+            st.bar_chart(week, color = "#FF6C6C")
         st.markdown('***')
 
         st.header("월별 학습 현황")

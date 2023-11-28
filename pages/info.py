@@ -2,18 +2,8 @@ import streamlit as st
 from streamlit_extras.switch_page_button import switch_page
 import time
 import src.db as db
-from st_pages import show_pages_from_config, add_page_title
 
-
-
-# add_page_title()
-# show_pages_from_config()
-
-# st.set_page_config(
-#     page_title = "Profile",
-# )
-
-st.write("account page")
+st.write("My info")
 # try:
 if st.session_state['login']== True:
   

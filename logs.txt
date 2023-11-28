@@ -1,0 +1,33 @@
+
+Collecting usage statistics. To deactivate, set browser.gatherUsageStats to False.
+
+
+  You can now view your Streamlit app in your browser.
+
+  Network URL: http://172.28.0.12:8501
+  External URL: http://34.75.219.32:8501
+
+/content/src/db.py:22: UserWarning: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+  df = pd.read_sql(query, conn)
+/content/src/db.py:22: UserWarning: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+  df = pd.read_sql(query, conn)
+/content/src/db.py:22: UserWarning: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+  df = pd.read_sql(query, conn)
+2023-11-28 18:38:18.197 Uncaught app exception
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/dist-packages/streamlit/runtime/scriptrunner/script_runner.py", line 534, in _run_script
+    exec(code, module.__dict__)
+  File "/content/main.py", line 111, in <module>
+    switch_page('info')
+  File "/usr/local/lib/python3.10/dist-packages/streamlit/runtime/metrics_util.py", line 396, in wrapped_func
+    result = non_optional_func(*args, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/streamlit_extras/switch_page_button/__init__.py", line 35, in switch_page
+    raise ValueError(f"Could not find page {page_name}. Must be one of {page_names}")
+ValueError: Could not find page info. Must be one of ['home', 'my page', 'my info', 'my performance', 'admin', 'math drill', 'menu', 'question', 'graded result', 'chat with ai']
+/content/src/db.py:22: UserWarning: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+  df = pd.read_sql(query, conn)
+/content/src/db.py:22: UserWarning: pandas only supports SQLAlchemy connectable (engine/connection) or database string URI or sqlite3 DBAPI2 connection. Other DBAPI2 objects are not tested. Please consider using SQLAlchemy.
+  df = pd.read_sql(query, conn)
+2023-11-28 18:38:06.834125 init session state
+2023-11-28 18:38:17.193923 is_admin True
+  Stopping...

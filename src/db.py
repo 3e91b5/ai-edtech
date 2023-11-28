@@ -8,42 +8,41 @@ import warnings
 warnings.filterwarnings("ignore")
 
 def init_connection():
-	# the contents of st.secrets are in .streamlit/secrets.toml
-	connection = psycopg2.connect(
-		user = st.secrets['username'],
-		password = st.secrets['password'],
-		host = st.secrets['host'],
-		port = st.secrets['port'],
-		database = st.secrets['database']
-	)    
-	return connection
+  global connection
+  connection = psycopg2.connect(
+  user = st.secrets['username'],
+  password = st.secrets['password'],
+  host = st.secrets['host'],
+  port = st.secrets['port'],
+  database = st.secrets['database'])
+  return connection
 
 def run_query(query):
-    print(datetime.datetime.now(), 'run query:',  query)
-    try:
-        conn = init_connection()
-        df = pd.read_sql(query, conn)
-    except psycopg2.Error as e:
-        print(datetime.datetime.now(), "DB error: ", e)
-        conn.close()
-    finally:
-        conn.close()
-    return df
+  global conn
+  conn = init_connection()
+  try:
+    df = pd.read_sql(query, conn)
+  except psycopg2.Error as e:
+    print(datetime.datetime.now(), "DB error: ", e)
+    conn.close()
+  finally:
+    conn.close()
+  return df
 
 def run_tx(query):
-	print(datetime.datetime.now(), 'run tx:',  query)
-	try:
-		conn = init_connection()
-		with conn.cursor() as cur:
-			cur.execute(query)
-	except psycopg2.Error as e:
-		print(datetime.datetime.now(), "DB error: ", e)
-		conn.rollback()
-		conn.close()
-	finally:
-		conn.commit()
-		conn.close()
-	return
+  global conn
+  conn = init_connection()
+  try:
+    with conn.cursor() as cur:
+      cur.execute(query)
+  except psycopg2.Error as e:
+    print(datetime.datetime.now(), "DB error: ", e)
+    conn.rollback()
+    conn.close()
+  finally:
+    conn.commit()
+    conn.close()
+  return
 
 ################## Table: student_db.students ##################
 # student_id: primary key
@@ -299,7 +298,7 @@ def get_problems():
 	#def get_problems(unit_id, student_id):
 	#level = get_student_level(student_id)
 	#query = f"SELECT problem_id FROM knowledge_map_db.problem WHERE unit_id = '{unit_id}' AND level = '{level}"
-	query = f"SELECT problem_id FROM knowledge_map_db.problem"
+	query = f"SELECT problem_id, level FROM knowledge_map_db.problem ORDER BY problem_id"
 	result = run_query(query)
 	if result.empty:
 		return False
@@ -337,12 +336,12 @@ def get_answer(problem_id, student_id):
 # neo4j (지식요소 겹치는 문제들 연결 - 같은 단원 내로 한정)
 def get_related_problems(qid):
 	query = f"MATCH ({qid : $qid})-[*]-(connected) RETURN connected"
-	return 
+	return
 
 # # neo4j (역량요소별로.. 배점 제일 높은 문제들 연결)
 # def get_capacity_problems(cid):
-# 	query = 
-# 	return 
+# 	query =
+# 	return
 
 # 추천 문제 제시
 def recommend_problem(unit_id, student_id, problem_id):
@@ -370,17 +369,18 @@ def recommend_problem(unit_id, student_id, problem_id):
 '''
 ##### 풀이 현황 업데이트 #####
 # 각 문제를 학생이 기존에 푼적 있는지 여부 확인
-def get_history(list, student_id): 
-	solved = []
-	query = f"SELECT problem_id FROM student_db.problem_progress WHERE student_id = '{student_id}'"
-	result = run_query(query)
-	for q in list:
-		if q in result:
-			solved.append(1)
-		else:
-			solved.append(0)
-    
-	return solved
+def get_history(df, student_id):
+  list = df['problem_id']
+  solved = []
+  query = f"SELECT problem_id FROM student_db.problem_progress WHERE student_id = '{student_id}'"
+  result = run_query(query)
+  for q in list:
+    if q in result['problem_id']:
+      solved.append(1)
+    else:
+      solved.append(0)
+
+  return solved
 
 # 채점 후 progress update -> 수정 필요
 def update_answer(problem_id, student_id, step_score, total_score, answer):
@@ -393,49 +393,15 @@ def update_answer(problem_id, student_id, step_score, total_score, answer):
 	else:
 		return True
 
-# 단원별 평균 성적 -> 학생 학년에 맞는 unit은 미리 입력해둠 
+# 단원별 평균 성적 -> 학생 학년에 맞는 unit은 미리 입력해둠
 def update_unit_score(unit_id, student_id):
 	query_1 = f"SELECT AVG(total_score) FROM student_db.problem_progress WHERE student_id = '{student_id}' and unit_id = '{unit_id}'"
 	score = run_query(query_1)
 	if score.empty:
 		return False
- 
 	query_2 = f"UPDATE student_db.unit_progress SET achievement = '{score}' WHERE student_id = '{student_id}' and unit_id = '{unit_id}'"
 	result = run_tx(query_2)
 	if result.empty:
 		return False
 	else:
 		return True
-'''
-# update competence db -> 수정 필요. competence의 initial value = 0
-def update_competence(student_id, problem_id):
-	# 방금 푼 문제 -> competence element 배점 확인
-	query1 = f"SELECT competence FROM knowledge_map_db.problem WHERE problem_id = '{problem_id}'"
-	proportion = run_query(query1)
-
-	query2 = f"SELECT total_score FROM student_db.problem_progress WHERE student_id = '{student_id}'"
-	score = run_query(query2)
-
-	proportion = proportion * score
-	# 기존 역량요소 값과의 평균으로 update 
-	query3 = f"UPDATE student_db.student_competence 
-			SET competence += CASE competence_id
-							WHEN 1 THEN '{proportion[0]}' 
-							WHEN 2 THEN '{proportion[1]}' 
-							WHEN 3 THEN '{proportion[2]}' 
-							WHEN 4 THEN '{proportion[3]}' 
-							WHEN 5 THEN '{proportion[4]}'
-							ELSE competence 
-							END
-							WHERE competence_id IN (1,2,3,4,5) and student_id = '{student_id}'"
-	result = run_tx(query3)
-	if result.empty:
-		return False
-	else:
-		return True
-
-# update knowledge db -> 위 함수와 동일한 방식으로 수정
-def update_knowledge(student_id, knowledge):
-
-	return 
-'''

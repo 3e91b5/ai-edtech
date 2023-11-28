@@ -3,18 +3,28 @@ import streamlit as st
 import time
 from streamlit_extras.switch_page_button import switch_page 
 import datetime
-# import pandas as pd
+import pandas as pd
 import src.db as db
-# import pages.menu as menu, pages.practice as practice, pages.graded as graded, pages.performance as performance, pages.info as info, pages.admin as admin, pages.signup as signup, pages.chatbot as chatbot
-from st_pages import show_pages_from_config, add_page_title
-
-# add_page_title()
-# show_pages_from_config()
+from st_pages import Page, Section, show_pages
 
 st.set_page_config(
     page_title = "AI-EdTech",
-    initial_sidebar_state = "auto",
-    
+    initial_sidebar_state = "auto",  
+)
+
+show_pages(
+    [
+        Page("main.py", "Home", ':classical_building:'),
+        Section(name="My Page", icon=':information_desk_person:'),
+        Page("pages/info.py", "My Info"),
+        Page("pages/performance.py", "My Performance"),
+        Page("pages/admin.py", "Admin"),
+        Section(name="Math Drill", icon=':books:'),
+        Page("pages/menu.py", "Menu"),
+        Page("pages/practice.py", "Question"),
+        Page("pages/graded.py", "Graded Result"),
+        Page("pages/chatbot.py", "Chat with ai", ':question:')
+    ]
 )
 
 # when the user first logs in, session_state is initialized
@@ -65,7 +75,6 @@ def session_state_login_init(account):
 if 'login' not in st.session_state: # should be changed to more clever way
 	print(datetime.datetime.now(), "init session state")
 	session_state_reset()
-
 
 def __init__(self):
 	self.apps = []

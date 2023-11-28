@@ -13,7 +13,7 @@ is_section = true
 
 [[pages]]
 path = "pages/info.py"
-name = "Info"
+name = "info"
 
 [[pages]]
 path = "pages/performance.py"
@@ -25,7 +25,7 @@ name = "Admin"
 
 [[pages]]
 name = "Math Drill"
-icon = 'trophy-fill'
+icon = ':books:'
 is_section = true
 
 [[pages]]
@@ -45,7 +45,3 @@ path = "pages/chatbot.py"
 name = "Chat with AI"
 icon = ':question:'
 is_section = true
-
-[[pages]]
-path = "pages/chatbot_gptexample.py"
-name = "chatbot_gptexample(demo)"
