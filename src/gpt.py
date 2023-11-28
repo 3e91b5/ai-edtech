@@ -19,7 +19,7 @@ def run_gpt_helloworld():
 	)
     messages = [
         {'role':"assistant", 'content':"You are professional mathematics teacher. As a good and kind teacher, you are teaching a student who is struggling with math. The student is asking you a question. Please answer the question."},
-        {"role": "user", "content": f"Hello. I am {st.session_state['student_id']}! Please answer using 1 sentence include my name."}, # this prompt should be improved
+        {"role": "user", "content": f"Hello. I am {st.session_state['account']}! Please answer using 1 sentence include my name."}, # this prompt should be improved
     ]
     completion = client.chat.completions.create(model='gpt-3.5-turbo', messages=messages)
     response = completion.choices[0].message.content
@@ -27,10 +27,9 @@ def run_gpt_helloworld():
     return response,  client # TODO: return client can maintain the chat session and remember the context?
     
 # get the question from student and do prompt engineering for gpt
-def default_prompt(question):
+def default_prompt():
     messages = [
         {'role':"assistant", 'content':"You are professional mathematics teacher. As a good and kind teacher, you are teaching a student who is struggling with math. The student is asking you a question. Please answer the question."},
-        {"role": "user", "content": question},
     ]
     return messages
 

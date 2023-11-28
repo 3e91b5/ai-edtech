@@ -20,17 +20,21 @@ st.set_page_config(
 # when the user first logs in, session_state is initialized
 # when the user logs out, session_state is reset
 def session_state_reset():
+	#student info
 	st.session_state['student_id'] = None
 	st.session_state['account'] = None
 	st.session_state['name'] = None
 	st.session_state['login'] = False
 	st.session_state['teacher'] = False
 	st.session_state['admin'] = False
+	st.session_state['problem_id'] = None 
+	
+	# chatbot
 	st.session_state['api_key'] = None
+	st.session_state['openai_model'] = None
+	st.session_state['message'] = []
 	st.session_state['gpt_session'] = False
 	st.session_state['gpt_client'] = None
-	st.session_state['message'] = []
-	st.session_state['problem_id'] = [] 
 
 # after login, session_state is initialized by student info from the database
 def session_state_login_init(account):
