@@ -22,19 +22,27 @@ if 'login' in st.session_state:
                 "score": [20, 95, 55, 80, 64],
             }
         )
-
-
+        from PIL import Image
+        image1 = Image.open('pages/performance1.jpg')
+        st.image(image1, use_column_width=True, caption='demo1')
+        image2 = Image.open('pages/performance2.jpg')
+        st.image(image2, use_column_width=True, caption='dem21')
+        
         ### 변수 가져오기
         student_id =  st.session_state['student_id']
-        st.write('student_id: ', student_id)
+        # st.write('student_id: ', student_id)
         history = db.get_all_score(student_id) 
-        st.write('history: ', history)
+        # st.write('history: ', history)
         today = history[history['timestamp'] == dt]
-        st.write(today)
+        # st.write('today', today)
+        # st.write('len(history): ', len(history))
         history = pd.pivot_table(
             history,
             index=['timestamp'],
-            aggfunc={'total_score': np.sum, 'student_id': len}
+            aggfunc={'total_score': np.sum,
+                    # 'student_id': st.session_state['student_id']
+                    },
+            # columns=['count'],
         ).rename(columns={'student_id': 'count'}) 
         history['week'] = history['timestamp'].isocalendar()[1]
         week = history[history['week'] == dt.isocalendar()[1]][['timestamp','count']]

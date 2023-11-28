@@ -46,6 +46,11 @@ if 'login' in st.session_state:
                 else:
                     with col5:
                         app.question_buttons(problems, item)
+        
+        from PIL import Image
+        image1 = Image.open('pages/menu1.jpg')
+        st.image(image1, use_column_width=True, caption='demo1')
+        
     else:
         st.write("로그인이 필요합니다.")
         clicked = st.button("main")
