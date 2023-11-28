@@ -180,6 +180,13 @@ def get_student_level(student_id):
 	else:
 		return result
 
+################## Table: student_db.student_competence ##################
+# student_competence_id: primary key
+# student_id: foreign key
+# competence:
+# competence_id:
+##########################################################################
+
 # competence (역량 요소)
 def get_student_competence(student_id):
 	query = f"SELECT competence FROM student_db.student_competence WHERE student_id = '{student_id}'"
@@ -188,6 +195,18 @@ def get_student_competence(student_id):
 		return False
 	else:
 		return result
+
+################## Table: student_db.problem_progress ##################
+# problem_progress_id: primary key
+# student_id: foreign key
+# problem_id: foreign key
+# student_answer:
+# step_score:
+# total_score:
+# correctness:
+# feedback:
+# timestamp:
+##########################################################################
 
 # 모든 문제에 대한 score
 def get_all_score(student_id):
@@ -216,6 +235,14 @@ def get_subunit_score(student_id, unit_id):
 	else:
 		return result
 
+################## Table: student_db.unit_progress ##################
+# unit_progress_id: primary key
+# student_id: 
+# main_unit_id: 
+# unit_id: 
+# achievement:
+##########################################################################
+
 # 대단원 평균 score -> main_unit_id는 main unit ID 
 def get_mainunit_score(student_id, main_unit_id):
 	query = f"SELECT AVG(achievement) FROM student_db.unit_progress WHERE student_id = '{student_id}' and main_unit_id = '{main_unit_id}'"
@@ -243,6 +270,14 @@ def get_units(grade):
 		return False
 	else:
 		return result
+
+
+################## Table: knowledge_map_db.problem ##################
+# student_competence_id: primary key
+# student_id: foreign key
+# competence:
+# competence_id:
+##########################################################################
 
 # 학생이 선택한 단원 & 학생 클래스 기준으로 list of questions 가져옴
 def get_problems():
