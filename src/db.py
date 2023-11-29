@@ -4,7 +4,8 @@ import pandas as pd
 import datetime
 import os
 
-
+import warnings
+warnings.filterwarnings("ignore")
 
 def init_connection():
 	# the contents of st.secrets are in .streamlit/secrets.toml
