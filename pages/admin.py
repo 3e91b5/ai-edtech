@@ -38,20 +38,20 @@ try:
             st.write("Not authorized")
             clicked = st.button('Go to main page')
             if clicked:
-                switch_page("main")
+                switch_page("home")
             
         
     else: # not logged in
         st.write("로그인이 필요합니다.")
         clicked = st.button('Go to main page')
         if clicked:
-            switch_page('main')
+            switch_page('home')
         
-    # switch_page("main")
+    # switch_page("home")
 
-        # switch_page("main")
+        # switch_page("home")
 except Exception as e:
-    switch_page("main")
+    switch_page("home")
 
 
 def delete_user(account):

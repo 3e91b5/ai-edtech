@@ -44,9 +44,9 @@ if 'login' in st.session_state:
         st.write("로그인이 필요합니다.")
         clicked = st.button("main")
         if clicked:
-            switch_page("main")
+            switch_page("home")
 else:
     st.write("로그인이 필요합니다.")
     clicked = st.button("main")
     if clicked:
-        switch_page("main")
+        switch_page("home")
