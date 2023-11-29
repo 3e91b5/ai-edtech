@@ -1,17 +1,17 @@
-# secret
-.streamlit/secrets.toml
-
-
-# node_modules
-node_modules/
+# npm module
+node_modules
 package-lock.json
 package.json
 
-# Virtual environment
-__pycache__/
+# environment
+*__pycache__/
+.config
 
-#log
-content/logs.txt
+# log
+content
+
+# key
+.streamlit/secrets.toml
 
 #test
 chatgpt_test.py
