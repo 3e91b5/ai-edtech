@@ -3,7 +3,7 @@ import streamlit as st
 import time
 from streamlit_extras.switch_page_button import switch_page 
 import datetime
-import pandas as pd
+# import pandas as pd
 import src.db as db
 # import pages.menu as menu, pages.practice as practice, pages.graded as graded, pages.performance as performance, pages.info as info, pages.admin as admin, pages.signup as signup, pages.chatbot as chatbot
 from st_pages import show_pages_from_config, add_page_title
