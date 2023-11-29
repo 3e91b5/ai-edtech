@@ -3,7 +3,7 @@ from streamlit_extras.switch_page_button import switch_page
 
 def add_problem_id(problem_id):
     st.session_state['problem_id'] = problem_id
-    switch_page("practice")
+    switch_page("question")
 
 def question_buttons(problems, item):
     if problems['level'][item] >= 4:
