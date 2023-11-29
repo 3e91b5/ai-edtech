@@ -94,7 +94,7 @@ if st.session_state["login"] == False:	# if not logged in
     
 			# if login button is clicked,
 			# 1. check whether student_id and password are not empty
-			# 2. check whether (student_id, password) pair is in the database (in funtion db.login_user)
+			# 2. check whether (student_id, password) pair is in the database (in function db.login_user)
 			# 3. if yes, 
 			#		initialize session_state by calling session_state_login_init(student_id)
 			# 4. switch page to info page (default page)
