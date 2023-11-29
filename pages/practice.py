@@ -111,6 +111,8 @@ if 'login' in st.session_state:
         if selected == "모르겠어요":
             st.toast("이 문제는 "+problem['hint']+" 개념을 활용해 풀 수 있어요!")
         if selected == "제출하기":
+#            switch_page('graded')
+            switch_page('graded Result')
             '''
             streamlit은 tabletPC 화면 상의 input 처리하는 기능이 없음 + ocr은 image url로 넣음.
             solved = "https://market.edugorilla.com/wp-content/uploads/sites/5/2017/07/algebra-hand.png"
