@@ -2,7 +2,8 @@
 import psycopg2
 import streamlit as st
 import pandas as pd
-import datetime
+import numpy as np
+from datetime import datetime, date
 import os
 
 import warnings
@@ -24,7 +25,7 @@ def run_query(query):
   try:
     df = pd.read_sql(query, conn)
   except psycopg2.Error as e:
-    print(datetime.datetime.now(), "DB error: ", e)
+    print(datetime.now(), "DB error: ", e)
     conn.close()
   finally:
     conn.close()
@@ -37,7 +38,7 @@ def run_tx(query):
     with conn.cursor() as cur:
       cur.execute(query)
   except psycopg2.Error as e:
-    print(datetime.datetime.now(), "DB error: ", e)
+    print(datetime.now(), "DB error: ", e)
     conn.rollback()
     conn.close()
   finally:
@@ -45,6 +46,23 @@ def run_tx(query):
     conn.close()
   return
 
+################## Table: student_db.students ##################
+# student_id: primary key
+# account: unique
+# password:
+# admin: boolean
+# name:
+# age:
+# date_joined:
+# last_login:
+# grade:
+#################################################################
+
+# 1. ACCOUNT / PERFORMANCE PAGE ----------------------------------------------------------------------------------------------- #
+### GET INFO ###
+
+# get student info by student_id
+# result: Dataframe[student_id, account, password, admin, name, age, date_joined, last_login, grade]
 def get_student_info(student_id):
 	query = f"SELECT * FROM student_db.students WHERE student_id = '{student_id}'"
 	result = run_query(query)
@@ -61,14 +79,171 @@ def get_student_info_by_account(account):
 	else:
 		return result
 
+def view_all_users():
+	query = 'SELECT * FROM student_db.students'
+	result = run_query(query)
+	return result
+
+def is_admin(student_id):
+	query = f"SELECT admin FROM student_db.students WHERE student_id = '{student_id}'"
+	result = run_query(query)
+	# print(datetime.now(), "is_admin",  result['admin'][0])
+
+	if result['admin'][0] == True:
+		return True
+	else:
+		return False
+
+
+# output = dataframe with three columns (problem id - score - date when student solved the problem)
+# 범위 = 여태까지 푼 모든 문제 히스토리
+def get_all_score(student_id):
+	query = f"SELECT problem_id, total_score, timestamp FROM student_db.problem_progress WHERE student_id = '{student_id}'"
+	result = run_query(query)
+	if result.empty:
+		return False
+	else:
+		return result
+
+# output = scalar value that indicates the average "score" of 해당 student
+# 범위 = 여태까지 푼 모든 문제 히스토리
+def get_average_score(student_id):
+	query = f"SELECT AVG(total_score) FROM student_db.problem_progress WHERE student_id = '{student_id}'"
+	result = run_query(query)
+	if result.empty:
+		return False
+	else:
+		return result
+
+# output = scalar value that indicates the score for 해당 problem id
+def get_score(student_id, problem_id):
+	query = f"SELECT total_score FROM student_db.problem_progress WHERE student_id = '{student_id}' and problem_id = '{problem_id}'"
+	result = run_query(query)
+	if result.empty:
+		return False
+	else:
+		return result
+
+# output = list of elements that indicate the average "score" of 해당 student - 해당 sub_unit
+# 범위 = input으로 들어온 sub_unit
+def get_subunit_score(student_id):
+	return
+
+# output = list of elements that indicates the average "score" of 해당 student - 해당 main_unit
+# 범위 = input으로 들어온 main_unit
+def get_mainunit_score(student_id):
+	return
+
+# output = list of elements that indicates the average "score" of 해당 student - 해당 area
+# 범위 = input으로 들어온 area
+def get_area_score(student_id):
+	return
+
+# output = list of elements that indicates the average "score" of 해당 student - 해당 subject
+# 범위 = input으로 들어온 subject
+def get_subject_score(student_id):
+	return
+
+# output = list of elements (1 or 0) that indicate whether student "completed" each sub-unit (소단원)
+# we use unit_id for sub unit ID and main_unit_id for main unit ID
+def get_subunit_progress(student_id):
+	query = f"SELECT unit_id FROM student_db.unit_progress WHERE student_id = '{student_id}' and achievement = 1"
+	result = run_query(query)
+	if result.empty:
+		return False
+	else:
+		return result
+
+# output = list of elements (1 or 0) that indicate whether student "completed" each main-unit (대단원)
+# we use unit_id for sub unit ID and main_unit_id for main unit ID
+# student "completes" main_unit iff he / she "completes" all sub_units included in the main_unit
+def get_mainunit_progress(student_id):
+	query = f"SELECT main_unit_id FROM student_db.unit_progress WHERE student_id = '{student_id}' and achievement = 1"
+	result = run_query(query)
+	if result.empty:
+		return False
+	else:
+		return result
+
+# output = list of elements (1 or 0) that indicate whether student "completed" each area
+# student "completes" area iff he / she "completes" all main_units included in the area
+def get_mainunit_progress(student_id):
+	query = f"SELECT area_id FROM student_db.area_progress WHERE student_id = '{student_id}' and achievement = 1"
+	result = run_query(query)
+	if result.empty:
+		return False
+	else:
+		return result
+
+# output = list of elements (1 or 0) that indicate whether student "completed" each subject
+# student "completes" subject iff he / she "completes" all area included in the subject
+def get_mainunit_progress(student_id):
+	query = f"SELECT subject_id FROM student_db.subject_progress WHERE student_id = '{student_id}' and achievement = 1"
+	result = run_query(query)
+	if result.empty:
+		return False
+	else:
+		return result
+
+# output = dataframe with five columns (subject / area / main unit / sub unit / progress)
+# "progress" is a continuous variable from 0 to 1, which indicates the proportion of questions solved within the sub-unit
+# 위 함수들은 progress를 완료 vs. 미완료로 정의. 반면 이 함수에선 각 unit / area / subject 에 속한 문제 중 몇 % 풀었는지로 정의. 
+def get_progress(student_id):
+	grade = get_student_grade(student_id)
+	# query = f"SELECT knowledge_map_db.subject.subject_name, knowledge_map_db.area.area_name, knowledge_map_db.main_unit.main_unit_name, 
+	# knowledge_map_db.sub_unit.unit_name, knowledge_map_db.problem.problem_id
+	# FROM knowledge_map_db.subject
+	# INNER JOIN knowledge_map_db.area
+	# ON knowledge_map_db.subject.subject_id = knowledge_map_db.area.subject_id
+	# INNER JOIN knowledge_map_db.main_unit
+	# ON knowledge_map_db.area.area_id = knowledge_map_db.main_unit.area_id
+	# INNER JOIN knowledge_map_db.sub_unit
+	# ON knowledge_map_db.main_unit.main_unit_id = knowledge_map_db.sub_unit.main_unit_id
+	# INNER JOIN knowledge_map_db.problem
+	# ON knowledge_map_db.sub_unit.unit_id = knowledge_map_db.problem.unit_id
+	# WHERE grade = '{grade}'"
+	query = f"SELECT knowledge_map_db.subject.subject_name, knowledge_map_db.area.area_name, knowledge_map_db.main_unit.main_unit_name, knowledge_map_db.sub_unit.unit_name, knowledge_map_db.problem.problem_id FROM knowledge_map_db.subject INNER JOIN knowledge_map_db.area	ON knowledge_map_db.subject.subject_id = knowledge_map_db.area.subject_id INNER JOIN knowledge_map_db.main_unit ON knowledge_map_db.area.area_id = knowledge_map_db.main_unit.area_id INNER JOIN knowledge_map_db.sub_unit ON knowledge_map_db.main_unit.main_unit_id = knowledge_map_db.sub_unit.main_unit_id INNER JOIN knowledge_map_db.problem ON knowledge_map_db.sub_unit.unit_id = knowledge_map_db.problem.unit_id WHERE grade = '{grade}'"
+	result = run_query(query)
+	if result.empty:
+		return False
+	
+	# compute proportion of questions solved for each sub-unit
+	result = get_history(result, student_id)
+	result = pd.pivot_table(
+		result,
+		index = 'unit_name',
+		aggfunc = {'solved': np.sum, 'problem_id': len}
+	).rename(columns = {'problem_id': 'total'})
+
+	# convert pivot table to data frame
+	result.reset_index(inplace = True)
+
+	return result
+
+# get student's knowledge progress -> TBD
+def get_knowledge_progress(student_id):
+	return
+
+# get student's competence level -> TBD
+def get_competence(student_id):
+	return 
+
+
+### UPDATE INFO ###
+
+# add user to db when user sign up
+# input: account, password, name, age, grade
+# default value: admin = False, date_joined = datetime.now(), last_login = None
+# return True if success, False if fail
 def add_user(account, password, name, age, grade):
 	query = f"SELECT * FROM student_db.students WHERE account = '{account}'"
-	print(datetime.datetime.now(), "check query:", query)
+	# print(datetime.now(), "check query:", query)
 	result = run_query(query)
 
 	if result.empty:
-		print(datetime.datetime.now(), "user data를 추가합니다.", account, password)
-		date_joined = datetime.datetime.now()
+		# print(datetime.now(), "user data를 추가합니다.", account, password)
+		date_joined = datetime.now()
+		# student_id is auto-incremented, so no need to specify student_id
 		add_query = f"INSERT INTO student_db.students (account, password, admin, name,age, grade,date_joined) VALUES('{account}', '{password}', False,'{name}', '{age}', '{grade}', '{date_joined}')"
 
 		run_tx(add_query)
@@ -82,40 +257,25 @@ def login_user(account, password):
 	if result.empty:
 		return False
 	else:
-		last_login = datetime.datetime.now()
+		last_login = datetime.now()
 		student_id = result['student_id'][0]
 		query = f"UPDATE student_db.students SET last_login = '{last_login}' WHERE student_id = '{student_id}'"
 		run_tx(query)
 		return True
 
-def view_all_users():
-	query = 'SELECT * FROM student_db.students'
-	result = run_query(query)
-	return result
 
 def delete_user(student_id):
 	query = f"select * from student_db.students where student_id = '{student_id}'"
 	result = run_query(query)
-	if result.empty:
+	if result.empty: # user not found
 		return False
 	account = result['account'][0]
 	query = f"DELETE FROM student_db.students WHERE student_id = '{student_id}'"
 	run_tx(query)
-	print(datetime.datetime.now(), "delete user", account)
-
+	# print(datetime.now(), "delete user", account)
+	
 	return True
 
-
-
-def is_admin(student_id):
-	query = f"SELECT admin FROM student_db.students WHERE student_id = '{student_id}'"
-	result = run_query(query)
-	print(datetime.datetime.now(), "is_admin",  result['admin'][0])
-
-	if result['admin'][0] == True:
-		return True
-	else:
-		return False
 
 def update_user_password(student_id, new_password):
 	query = f"UPDATE student_db.students SET password = '{new_password}' WHERE student_id = '{student_id}'"
@@ -125,27 +285,25 @@ def update_user_password(student_id, new_password):
 	else:
 		return True
 
-def update_student_score(student_id, score):
-	return
-	#TODO: after db schema is fixed, implement this function. below is example code.
-	query = f"UPDATE edutech.studentdb SET score = '{score}' WHERE student_id = '{student_id}'"
-	result = run_tx(query)
-	if result.empty:
-		return False
-	else:
-		return True
 
-##### student info #####
-# school grade (학년)
+# 2. MENU PAGE ------------------------------------------------------------------------------------------------------------ #
+
+# student_db.students 에서 각 정보를 가져오는 함수를 따로 짤 수도 있지만 get_student_info를 재사하는 방법도 있음
 def get_student_grade(student_id):
-	query = f"SELECT grade FROM student_db.students WHERE student_id = '{student_id}'"
-	result = run_query(query)
-	if result.empty:
-		return False
-	else:
-		return result['grade'][0]
+	return get_student_info(student_id)['grade'][0]
 
-# 상/중/하 클래스
+# output = scalar value that indicates student's school grade (학년)
+# def get_student_grade(student_id):
+# 	query = f"SELECT grade FROM student_db.students WHERE student_id = '{student_id}'"
+# 	result = run_query(query)
+# 	if result.empty:
+# 		return False
+# 	else:
+# 		return result['grade'][0]
+
+
+# output = scalar value that ranges from 1 to 5, with 1 being the lowest level (공부 못하는 학생)
+# 문제 풀이 상황에 따라 dynamic하게 업데이트 되는 값 아님. 교사가 임의로 설정해준 값.
 def get_student_level(student_id):
 	query = f"SELECT level FROM student_db.students WHERE student_id = '{student_id}'"
 	result = run_query(query)
@@ -154,7 +312,58 @@ def get_student_level(student_id):
 	else:
 		return result
 
-# competence (역량 요소)
+# output = list of unit name that matches student's grade (학년)
+# Menu 화면 display 용도
+def get_unit_name(grade):
+	query = f"SELECT name FROM knowledge_map_db.sub_unit WHERE grade = {grade}"
+	result = run_query(query)
+	if result.empty:
+		return False
+	else:
+		return result
+
+# output = scalar value of unit_id that corresponds to the unit_name selected 
+# unit_id로 바꾼 후 get_problems()에 input으로 넣을 용도
+def get_unit_id(unit_name):
+	query = f"SELECT unit_id FROM knowledge_map_db.sub_unit WHERE unit_name = {unit_name}"
+	result = run_query(query)
+	if result.empty:
+		return False
+	else:
+		return result
+	
+# output = dataframe with two columns (problem_id and level) 
+# 		   dataframe rows are selected based on conditions: (i) unit_id selected by the student and (ii) student's level
+# db 완성되지 않은 상태라 지금은 어떤 unit_id 선택하든 결과 같음
+def get_problem_list():
+	#def get_problem_list(unit_id, student_id):
+	#level = get_student_level(student_id)
+	#query = f"SELECT problem_id, level FROM knowledge_map_db.problem WHERE unit_id = '{unit_id}' AND level = '{level}"
+	query = f"SELECT problem_id, level FROM knowledge_map_db.problem ORDER BY problem_id"
+	result = run_query(query)
+	if result.empty:
+		return False
+	else:
+		return result
+	
+# output = list of problem_id that 해당 student previously worked on
+# Menu 페이지에서 버튼 색상 구현할 때 사용
+def get_history(df, student_id):
+	list = df['problem_id']
+	solved = []
+	query = f"SELECT problem_id FROM student_db.problem_progress WHERE student_id = '{student_id}'"
+	result = run_query(query)
+	for q in list:
+		if q in result['problem_id']:
+			solved.append(1)
+		else:
+			solved.append(0)
+
+	return solved
+
+# 3. QUESTION PAGE --------------------------------------------------------------------------------------------------------- #
+
+# output = list of five values that indicate student's competence level for each 역량 요소
 def get_student_competence(student_id):
 	query = f"SELECT competence FROM student_db.student_competence WHERE student_id = '{student_id}'"
 	result = run_query(query)
@@ -163,74 +372,10 @@ def get_student_competence(student_id):
 	else:
 		return result
 
-# 모든 문제에 대한 score
-def get_all_score(student_id):
-	query = f"SELECT problem_id, total_score, timestamp FROM student_db.problem_progress WHERE student_id = '{student_id}'"
-	result = run_query(query)
-	if result.empty:
-		return False
-	else:
-		return result
-
-# 특정 문제 score
-def get_score(student_id, problem_id):
-	query = f"SELECT total_score FROM student_db.problem_progress WHERE student_id = '{student_id}' and problem_id = '{problem_id}'"
-	result = run_query(query)
-	if result.empty:
-		return False
-	else:
-		return result
-
-# 소단원 평균 score -> unit_id는 sub unit ID
-def get_subunit_score(student_id, unit_id):
-	query = f"SELECT achievement FROM student_db.unit_progress WHERE student_id = '{student_id}' and unit_id = '{unit_id}'"
-	result = run_query(query)
-	if result.empty:
-		return False
-	else:
-		return result
-
-# 대단원 평균 score -> main_unit_id는 main unit ID
-def get_mainunit_score(student_id, main_unit_id):
-	query = f"SELECT AVG(achievement) FROM student_db.unit_progress WHERE student_id = '{student_id}' and main_unit_id = '{main_unit_id}'"
-	result = run_query(query)
-	if result.empty:
-		return False
-	else:
-		return result
-
-# 전체 평균 score
-def get_average_score(student_id):
-	query = f"SELECT AVG(achievement) FROM student_db.unit_progress WHERE student_id = '{student_id}'"
-	result = run_query(query)
-	if result.empty:
-		return False
-	else:
-		return result
-
-##### 문제 풀이 페이지 구현 #####
-# 학년별 list of units
-def get_units(grade):
-	query = f"SELECT unit_id FROM knowledge_map_db.sub_unit WHERE grade = {grade}"
-	result = run_query(query)
-	if result.empty:
-		return False
-	else:
-		return result
-
-# 학생이 선택한 단원 & 학생 클래스 기준으로 list of questions 가져옴
-def get_problems():
-	#def get_problems(unit_id, student_id):
-	#level = get_student_level(student_id)
-	#query = f"SELECT problem_id FROM knowledge_map_db.problem WHERE unit_id = '{unit_id}' AND level = '{level}"
-	query = f"SELECT problem_id, level FROM knowledge_map_db.problem ORDER BY problem_id"
-	result = run_query(query)
-	if result.empty:
-		return False
-	else:
-		return result
-
-# 학생이 선택한 문제 가져오기
+# output = one row of dataframe selected if problem_id is equal to what is (i) selected by the student or (ii) recommended by the system
+# output에 "정답" 답안지 및 배점 포함되어 있음. Question page, Graded result page 모두에서 사용하는 함수.
+# "채점 결과" 페이지에서 같은 input으로 함수 호출하므로 cache 해둠
+@st.cache
 def get_selected_problem(problem_id):
 	query = f"SELECT * FROM knowledge_map_db.problem WHERE problem_id = '{problem_id}'"
 	result = run_query(query)
@@ -239,37 +384,18 @@ def get_selected_problem(problem_id):
 	else:
 		return result
 
-# 채점결과 페이지 구현시 답안지 가져오기
-def get_solution(problem_id):
-	query = f"SELECT solution, step_criteria, step_score FROM knowledge_map_db.problem WHERE problem_id = '{problem_id}'"
-	result = run_query(query)
-	if result.empty:
-		return False
-	else:
-		return result
-
-# 채점결과 페이지 구현시 학생 답안 가져오기
-def get_answer(problem_id, student_id):
-	# query = f"SELECT student_answer, step_score, total_score FROM knowledge_map_db.problem_progress WHERE problem_id = '{problem_id}' and student_id = '{student_id}' "
-	query = f"SELECT student_answer, step_score, total_score FROM student_db.problem_progress WHERE problem_id = '{problem_id}' and student_id = '{student_id}' "
-	result = run_query(query)
-	if result.empty:
-		return False
-	else:
-		return result
 '''
 # neo4j (지식요소 겹치는 문제들 연결 - 같은 단원 내로 한정)
 def get_related_problems(qid):
 	query = f"MATCH ({qid : $qid})-[*]-(connected) RETURN connected"
 	return
 
-# # neo4j (역량요소별로.. 배점 제일 높은 문제들 연결)
-# def get_capacity_problems(cid):
-# 	query =
-# 	return
+# neo4j (역량요소별로.. 배점 제일 높은 문제들 연결)
+def get_capacity_problems(cid):
+	return
 
 # 추천 문제 제시
-def recommend_problem(unit_id, student_id, problem_id):
+def get_recommend_problem(unit_id, student_id, problem_id):
 	# 같은 단원 & 지식 요소 1개 이상 겹치는 문제들 가져옴
 	problems = get_related_problems(problem_id)
 	# 학생이 각 문제 풀었는지 확인 (풀었으면 solved = 1, 안 풀었으면 solved = 0)
@@ -292,41 +418,112 @@ def recommend_problem(unit_id, student_id, problem_id):
 
 	return nqid
 '''
-##### 풀이 현황 업데이트 #####
-# 각 문제를 학생이 기존에 푼적 있는지 여부 확인
-def get_history(df, student_id):
-  list = df['problem_id']
-  solved = []
-  query = f"SELECT problem_id FROM student_db.problem_progress WHERE student_id = '{student_id}'"
-  result = run_query(query)
-  for q in list:
-    if q in result['problem_id']:
-      solved.append(1)
-    else:
-      solved.append(0)
 
-  return solved
+# 4. GRADED RESULTS PAGE ---------------------------------------------------------------------------------------------------- #
 
-# 채점 후 progress update -> 수정 필요
-def update_answer(problem_id, student_id, step_score, total_score, answer):
-	now = datetime.now()
-	dt = now.strftime("%Y-%m-%d")
-	query = f"INSERT INTO student_db.problem_progress VALUES ('{student_id}', '{problem_id}', {answer}, {step_score}, {total_score}, {dt})"
+# if student leaves page without clicking on "제출하기", uploaded files are removed (예: Menu, My Performance, Admin page 방문했다가 돌아옴)
+# 학생이 "제출하기" 누르면
+#	1) gpt.py 의 get_ocr() 함수 call. converted file을 input으로 받고, output은 latex. db 저장하지 않고 바로 grade_answer()의 input으로.
+#	2) gpt.py 의 grade_answer() 함수 call. output은 graded answer (latex, 부분 점수)
+#	3) db.py의 update_graded_answer() 함수 call. 결과를 db에 저장.
+
+# update answer (and score) graded by chatGPT 
+# update 시점: "제출하기" 버튼 누른 직후
+def update_graded_answer(problem_id, student_id, solved_answer):
+	today = date.today()
+	query = f"INSERT INTO student_db.problem_progress VALUES ('{student_id}', '{problem_id}', {solved_answer}, {today})"
 	result = run_tx(query)
 	if result.empty:
 		return False
 	else:
 		return True
 
-# 단원별 평균 성적 -> 학생 학년에 맞는 unit은 미리 입력해둠
-def update_unit_score(unit_id, student_id):
-	query_1 = f"SELECT AVG(total_score) FROM student_db.problem_progress WHERE student_id = '{student_id}' and unit_id = '{unit_id}'"
-	score = run_query(query_1)
-	if score.empty:
-		return False
-	query_2 = f"UPDATE student_db.unit_progress SET achievement = '{score}' WHERE student_id = '{student_id}' and unit_id = '{unit_id}'"
-	result = run_tx(query_2)
+# output = dataframe with three columns (student_answer, step_score, total_score)
+# 		   dataframe rows are selected based on conditions: problem_id solved by the student
+# "학생이 작성한" 답안지 가져오는 쿼리
+def get_answer(problem_id, student_id):
+	query = f"SELECT student_answer, step_score, total_score FROM student_db.problem_progress WHERE problem_id = '{problem_id}' and student_id = '{student_id}' "
+	result = run_query(query)
 	if result.empty:
 		return False
 	else:
-		return True
+		return result
+
+# 5. CHAT WITH AI PAGE ---------------------------------------------------------------------------------------------------- #
+
+# Chat with AI 할때 가져갈 정보 -> TBD
+def get_chat():
+	return
+
+# chat 했으면 그 내용 update -> TBD
+def update_chat():
+	return
+
+# 6. session logout 한 직후 database update --------------------------------------------------------------------------------- #
+
+# update할 사항:
+# 1) subject / area / main unit / sub unit 별 progress (해당하는 문제들 전부 풀었는지 여부)
+# 2) 역량, 지식 요소 progress 
+# subject / area / main unit / sub unit 별 평균 성적은 따로 db에 저장하지 않고, 필요시 쿼리로 계산
+
+# update progress (value 0 if incomplete, 1 if complete) for each sub-unit (소단원)
+# "completion" indicates that the student solved all questions within each unit
+def update_subunit_progress(student_id):
+	return
+
+# update progress (value 0 if incomplete, 1 if complete) for each main-unit (대단원)
+def update_mainunit_progress(student_id):
+	return 
+
+# update progress (value 0 if incomplete, 1 if complete) for each area
+def update_area_progress(student_id):
+	return 
+
+# update progress (value 0 if incomplete, 1 if complete) for each subject
+def update_subject_progress(student_id):
+	return
+
+# update student's level of competence for each 역량 요소
+def update_student_competence(student_id):
+	return
+	
+# update student's progress for each 지식 요소
+def update_student_knowledge(student_id, knowledge_id):
+	return
+
+
+
+################## Table: student_db.student_competence ##################
+# student_competence_id: primary key
+# student_id: foreign key
+# competence:
+# competence_id:
+##########################################################################
+
+################## Table: student_db.problem_progress ##################
+# problem_progress_id: primary key
+# student_id: foreign key
+# problem_id: foreign key
+# student_answer:
+# step_score:
+# total_score:
+# correctness:
+# feedback:
+# timestamp:
+##########################################################################
+
+################## Table: student_db.unit_progress ##################
+# unit_progress_id: primary key
+# student_id: 
+# main_unit_id: 
+# unit_id: 
+# achievement:
+##########################################################################
+
+
+################## Table: knowledge_map_db.problem ##################
+# student_competence_id: primary key
+# student_id: foreign key
+# competence:
+# competence_id:
+##########################################################################
