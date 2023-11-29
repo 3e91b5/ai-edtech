@@ -1,3 +1,13 @@
+# npm module
+node_modules
+package-lock.json
+package.json
+
+# python virtual environment
+*__pycache__/
+
+# log
+content
 
 # key
 .streamlit/secrets.toml
