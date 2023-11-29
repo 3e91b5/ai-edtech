@@ -10,11 +10,15 @@ if 'login' in st.session_state:
     if st.session_state['login'] == True:
         student_id = st.session_state['student_id']
         grade = db.get_student_grade(student_id)
-<<<<<<< HEAD
-=======
+
+
         # st.write(f'grade is {grade}')
->>>>>>> 3995f1d (cherry-pick from main branch done)
-        units = db.get_units(grade)
+
+
+
+        units = db.get_unit_name(grade)
+
+        ### 화면 구성
 
         st.header("학습메뉴")
         col1, padding, col2, col3, col4, col5 = st.columns([3,1,2,2,2,2])
