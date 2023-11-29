@@ -45,9 +45,7 @@ else:
   st.write("로그인이 필요합니다.")
   clicked = st.button("main")
   if clicked:
-    switch_page("main")
+    switch_page('home')
     
 # except Exception as e:
-#   switch_page("main")
-  
-  
+#   switch_page("home")

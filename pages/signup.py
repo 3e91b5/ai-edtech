@@ -30,7 +30,7 @@ if 'login' in st.session_state:
                     success = db.add_user(new_account, new_password, new_name, new_age, new_grade)
                     if success:
                         st.success("회원가입 성공! 로그인해주세요")
-                        switch_page("main")
+                        switch_page("home")
                     else:
                         st.error("이미 존재하는 ID입니다.")
                 else:
@@ -43,7 +43,7 @@ if 'login' in st.session_state:
         st.write("이미 로그인중입니다.")
         clicked = st.button("Go to main page")
         if clicked:
-            switch_page("main")
+            switch_page("home")
 else:
     st.session_state['login'] = False
-    switch_page("main")
+    switch_page("home")
