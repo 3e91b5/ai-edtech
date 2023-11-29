@@ -86,11 +86,11 @@ if 'login' in st.session_state:
         if selected == "학습메뉴":
             switch_page('menu')
         if selected == "챗봇과 얘기하기":
-            switch_page('chatbot')
+            switch_page('chat with ai')
         if selected == "다음 문제로 이동":
             #st.session_state['problem_id'] = recommend_problem(unit_id, student_id, problem_id):
             st.session_state['problem_id'] = 2
-            switch_page('practice')
+            switch_page('question')
     else:
         st.write("로그인이 필요한 서비스입니다.")
         clicked = st.button("main")

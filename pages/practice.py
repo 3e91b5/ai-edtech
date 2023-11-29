@@ -85,7 +85,7 @@ if 'login' in st.session_state:
             st.toast('이 문제는 '+':red[힌트]'+' 개념을 활용해 풀 수 있어요!')
         if selected == "제출하기":
 #            switch_page('graded')
-            switch_page('Graded Result')
+            switch_page('graded Result')
     else:
         st.write("로그인이 필요합니다.")
         clicked = st.button("main")
