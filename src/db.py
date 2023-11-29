@@ -5,6 +5,9 @@ import pandas as pd
 import datetime
 import os
 
+import warnings
+warnings.filterwarnings("ignore")
+
 def init_connection():
   global connection
   connection = psycopg2.connect(
