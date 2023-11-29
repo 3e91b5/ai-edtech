@@ -13,8 +13,7 @@ if 'login' in st.session_state:
         student_id = st.session_state['student_id']
         grade = db.get_student_grade(student_id)
         # st.write(f'grade is {grade}')
-        units = db.get_units(grade)
-
+        units = db.get_unit_name(grade)
 
         ### 화면 구성
         st.header("학습메뉴")
