@@ -83,12 +83,13 @@ def get_student_info_by_account(account):
 # return True if success, False if fail
 def add_user(account, password, name, age, grade):
 	query = f"SELECT * FROM student_db.students WHERE account = '{account}'"
-	print(datetime.datetime.now(), "check query:", query)
+	# print(datetime.datetime.now(), "check query:", query)
 	result = run_query(query)
 
 	if result.empty:
 		print(datetime.datetime.now(), "user data를 추가합니다.", account, password)
 		date_joined = datetime.datetime.now()
+		# student_id is auto-incremented, so no need to specify student_id
 		add_query = f"INSERT INTO student_db.students (account, password, admin, name,age, grade,date_joined) VALUES('{account}', '{password}', False,'{name}', '{age}', '{grade}', '{date_joined}')"
 
 		run_tx(add_query)
@@ -106,6 +107,7 @@ def login_user(account, password):
 	else:
 		last_login = datetime.datetime.now()
 		student_id = result['student_id'][0]
+		# update last_login field
 		query = f"UPDATE student_db.students SET last_login = '{last_login}' WHERE student_id = '{student_id}'"
 		run_tx(query)
 		return True
@@ -122,7 +124,8 @@ def view_all_users():
 def delete_user(student_id):
 	query = f"select * from student_db.students where student_id = '{student_id}'"
 	result = run_query(query)
-	if result.empty:
+
+	if result.empty: # user not found
 		return False
 	account = result['account'][0]
 	query = f"DELETE FROM student_db.students WHERE student_id = '{student_id}'"
@@ -142,15 +145,26 @@ def is_admin(student_id):
 	else:
 		return False
 
-# update user password
-def update_user_password(student_id, new_password):
+# set user password
+def set_user_password(student_id, new_password):
 	query = f"UPDATE student_db.students SET password = '{new_password}' WHERE student_id = '{student_id}'"
 	result = run_tx(query)
 	if result.empty:
 		return False
 	else:
 		return True
-	
+
+# set user name
+def set_student_grade(student_id, grade):
+	query = f"UPDATE student_db.students SET grade = '{grade}' WHERE student_id = '{student_id}'"
+	result = run_tx(query)
+	if result.empty:
+		return False
+	else:
+		return True
+
+
+
 def update_student_score(student_id, score):
 	return
 	#TODO: after db schema is fixed, implement this function. below is example code.		

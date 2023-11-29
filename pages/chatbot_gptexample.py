@@ -15,9 +15,6 @@ from st_pages import show_pages_from_config, add_page_title
 
 
 
-
-
-
 if 'login' in st.session_state:
     if st.session_state['login'] == True:
         st.title("ChatGPT-like clone")
@@ -33,6 +30,8 @@ if 'login' in st.session_state:
                 reponse , st.session_state['gpt_client'] = gpt.run_gpt_helloworld()
                 st.session_state.messages.append({"role": "assistant", "content": reponse})
                 # st.write(reponse)
+                
+                # st.session_state initialized
                 st.session_state['gpt_session'] = True
                 st.session_state['openai_model'] = "gpt-3.5-turbo"
                 st.session_state['messages'] =  gpt.default_prompt()

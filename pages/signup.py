@@ -14,16 +14,19 @@ st.set_page_config(
 if 'login' in st.session_state:
     if st.session_state['login'] == False:
         st.write("signup page")
+        
+        # signup form
         with st.form("signup"):
             new_account = st.text_input('ID:', autocomplete="on", placeholder="아이디 입력", max_chars=10)
             new_password = st.text_input('Password:', type='password', placeholder="비밀번호 입력", max_chars=4)
             new_name= st.text_input('Name:', placeholder="이름 입력", max_chars=10)
             new_age = st.text_input('Age:', placeholder="나이 입력", max_chars=2)
             new_grade = st.text_input('Grade:', placeholder="학년 입력", max_chars=2)
+            
             submitted = st.form_submit_button("회원가입")
             if submitted:
                 if new_account and new_password:
-                    print(datetime.datetime.now(), "signup submitted", new_account, new_password)
+                    # print(datetime.datetime.now(), "signup submitted", new_account, new_password)
                     success = db.add_user(new_account, new_password, new_name, new_age, new_grade)
                     if success:
                         st.success("회원가입 성공! 로그인해주세요")

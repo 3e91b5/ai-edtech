@@ -27,8 +27,7 @@ if st.session_state['login']== True:
     # account menu for student
     pass
   
-  # show student info page
-  # example
+  # show student info page example
   student_info = db.get_student_info(st.session_state['student_id'])
   # st.write(student_info)
   default_student_info = {

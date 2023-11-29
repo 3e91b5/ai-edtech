@@ -16,6 +16,7 @@ try:
     if st.session_state['login'] == True:
         if st.session_state['admin'] == True: # Admin page
             
+            # delete user menu
             with st.form("delete_user"):
                 account = st.text_input('Delete ID:', autocomplete="on", placeholder="아이디 입력", max_chars=10)
                 submitted = st.form_submit_button("Delete user")
@@ -25,16 +26,14 @@ try:
                         st.success(f"User '{account}' deleted")
                     else:
                         st.error("User not found")
-                
-            
-            
-            
+                        
+            # view all users menu
             submitted = st.button('View all users')
             if submitted:
                 st.write(db.view_all_users())
             
         
-        else:
+        else: # not admin
             st.write("Not authorized")
             clicked = st.button('Go to main page')
             if clicked:
@@ -47,13 +46,8 @@ try:
         if clicked:
             switch_page('main')
         
-    # switch_page("main")
-
-        # switch_page("main")
 except Exception as e:
     switch_page("main")
 
 
-def delete_user(account):
-    return db.delete_user(account)
     
