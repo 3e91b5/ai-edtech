@@ -87,6 +87,13 @@ if 'login' in st.session_state:
         if selected == "제출하기":
 #            switch_page('graded')
             switch_page('graded Result')
+            '''
+            streamlit은 tabletPC 화면 상의 input 처리하는 기능이 없음 + ocr은 image url로 넣음.
+            solved = "https://market.edugorilla.com/wp-content/uploads/sites/5/2017/07/algebra-hand.png"
+            ocr_solved = gpt.get_ocr(solved)
+            gpt.scored(ocr_solved)
+            '''
+            switch_page('graded')
     else:
         st.write("로그인이 필요합니다.")
         clicked = st.button("main")

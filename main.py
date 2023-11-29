@@ -108,7 +108,7 @@ if st.session_state["login"] == False:	# if not logged in
 						st.success("로그인 중")
 						
 						time.sleep(1) # redirect to info page after few seconds
-						switch_page('My info')
+						switch_page('my info')
     
 					else: # if login fails
 						st.error("ID 혹은 비밀번호를 다시 입력해주세요")
