@@ -17,3 +17,6 @@ content
 chatgpt_test.py
 # commit code
 for_git_commit.ipynb
+
+# MATH dataset
+MATH/*
