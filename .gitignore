@@ -15,7 +15,6 @@ content
 
 #test
 chatgpt_test.py
-<<<<<<< HEAD
 
 # jupyter notebook file
 *.ipynb
@@ -29,4 +28,3 @@ MATH.tar
 =======
 # commit code
 for_git_commit.ipynb
->>>>>>> 3995f1d (cherry-pick from main branch done)
