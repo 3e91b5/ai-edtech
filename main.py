@@ -5,7 +5,7 @@ from streamlit_extras.switch_page_button import switch_page
 import datetime
 import pandas as pd
 import src.db as db
-from st_pages import Page, Section, show_pages
+from st_pages import Page, Section, show_pages, hide_pages
 
 st.set_page_config(
     page_title = "AI-EdTech",
@@ -23,9 +23,12 @@ show_pages(
         Page("pages/menu.py", "Menu"),
         Page("pages/practice.py", "Question"),
         Page("pages/graded.py", "Graded Result"),
-        Page("pages/chatbot.py", "Chat with ai", ':question:')
+        Page("pages/chatbot.py", "Chat with ai", ':question:'),
+        # Section(name="SignUp", icon=':pencil:'),
+        Page("pages/signup.py", "SignUp"),
     ]
 )
+hide_pages(["SignUp"])
 
 # when the user first logs in, session_state is initialized
 # when the user logs out, session_state is reset
@@ -128,7 +131,7 @@ if st.session_state["login"] == False:	# if not logged in
 				else: # if student_id or password is empty
 					st.error("모든 정보를 입력해주세요")
 	if st.button("회원가입"):
-		switch_page('signup')
+		switch_page('Signup')
 
 
 else: # if logged in
