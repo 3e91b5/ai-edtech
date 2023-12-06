@@ -20,16 +20,11 @@ if 'login' in st.session_state:
         st.title("ChatGPT-like clone")
 
 
-        # init client
         with st.form('authkey_chatgpt'):
             apikey = st.text_input('인증키를 입력하세요')
             submitted = st.form_submit_button("인증하기")
             if submitted:
                 gpt.set_apikey(apikey)
-                
-                reponse , st.session_state['gpt_client'] = gpt.run_gpt_helloworld()
-                st.session_state.messages.append({"role": "assistant", "content": reponse})
-                # st.write(reponse)
                 
                 # st.session_state initialized
                 st.session_state['gpt_session'] = True
@@ -50,7 +45,8 @@ if 'login' in st.session_state:
         
         # Initialize chat history
         if "messages" not in st.session_state:
-            st.session_state.messages = gpt.default_prompt()
+            st.session_state.messages = []
+            # st.session_state.messages = gpt.default_prompt()
 
         # Display chat messages from history on app rerun
         for message in st.session_state.messages:
@@ -58,7 +54,6 @@ if 'login' in st.session_state:
                 st.markdown(message["content"])
         
         # accept user input
-        
         if prompt := st.chat_input("Ask math questions"):
             # Add user message to chat history
             st.session_state.messages.append({"role": "user", "content": prompt})

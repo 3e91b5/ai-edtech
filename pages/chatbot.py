@@ -17,7 +17,7 @@ def get_apikey():
 
 
 def interactive_chatbot():
-        # interactive chatbot
+    # interactive chatbot
     st.title("Interactive Chatbot")
     
     with st.form('authkey_chatgpt'):
@@ -44,8 +44,7 @@ def interactive_chatbot():
     if clear_message:
         st.session_state.messages = []
         
-    if st.session_state['gpt_session'] == True:
-
+    if st.session_state['gpt_session'] == True: # authentication needed
         # client = OpenAI(api_key=apikey)
         client = st.session_state['gpt_client']
 
@@ -97,11 +96,8 @@ def interactive_chatbot():
 
 if 'login' in st.session_state:
     if st.session_state['login'] == True:
-        if st.session_state['login'] == True:
+        interactive_chatbot()
         
-            interactive_chatbot()
-            
-
             
     else:
         st.write("로그인이 필요한 서비스입니다.")
