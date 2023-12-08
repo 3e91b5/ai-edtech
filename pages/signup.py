@@ -27,9 +27,20 @@ if 'login' in st.session_state:
             if submitted:
                 if new_account and new_password:
                     # print(datetime.datetime.now(), "signup submitted", new_account, new_password)
+                    if not new_grade == '10' or new_grade == '11':
+                        st.error("학년은 10, 11만 입력 가능합니다.")
+                        switch_page("signup")
                     success = db.add_user(new_account, new_password, new_name, new_age, new_grade)
                     if success:
                         st.success("회원가입 성공! 로그인해주세요")
+                        # 회원가입시 학년(grade)에 맞게 subject - area - main unit - sub unit - knowledge 값들이 student_db에 입력됨
+                        db.init_db_using_signup(new_account, new_grade)
+                        
+                        
+                        
+                        
+                        
+                        
                         switch_page("home")
                     else:
                         st.error("이미 존재하는 ID입니다.")
@@ -47,3 +58,4 @@ if 'login' in st.session_state:
 else:
     st.session_state['login'] = False
     switch_page("home")
+
