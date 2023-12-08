@@ -1,18 +1,16 @@
-# After installing langchain, you need to run 'openai migrate' command in cli for the first time.
 import random
 import psycopg2
 import streamlit as st
 import os
 import openai
 import psycopg2
+from psycopg2 import sql
+from itertools import zip_longest
 import streamlit as st
 import pandas as pd
 import json
 import glob
 import openai
-from langchain.chat_models import ChatOpenAI
-from langchain.utilities import SQLDatabase
-from langchain.agents.openai_assistant import OpenAIAssistantRunnable
 from langchain.chat_models import ChatOpenAI
 from langchain.memory import ConversationBufferMemory
 from langchain.utilities import SQLDatabase
@@ -20,8 +18,11 @@ from langchain.prompts import ChatPromptTemplate
 from langchain.cache import SQLAlchemyCache
 from langchain.globals import set_llm_cache
 from langchain.schema import AIMessage, HumanMessage, SystemMessage
-from langchain.chains import LLMChain # These are not working on openai>=1.2.0
-from langchain_experimental.sql import SQLDatabaseChain # These are not working on openai>=1.2.0
+from langchain.schema import (
+    SystemMessage,
+    HumanMessage,
+    AIMessage
+)
 
 def init_db(include_tables = []):
     """
@@ -70,6 +71,7 @@ def langchain_single_chat(chat, system_message, human_message):
   # return the response as a string
   return response.content
 
+# Get the problem from DB
 def get_problem(cursor, problem_id):
     query = """
     SELECT
@@ -78,10 +80,7 @@ def get_problem(cursor, problem_id):
         p.solution,
         p.hint,
         p.level,
-        p.step_criteria,
-        p.step_score,
-        p.competence,
-        ARRAY_AGG(DISTINCT k.knowledge_name) AS knowledge,
+        p.knowledge_score,
         ARRAY_AGG(DISTINCT su.sub_unit_name) AS sub_unit,
         ARRAY_AGG(DISTINCT mu.main_unit_name) AS main_unit,
         ARRAY_AGG(DISTINCT a.area_name) AS area
@@ -106,6 +105,8 @@ def get_problem(cursor, problem_id):
     cursor.execute(query)
     query_data = cursor.fetchall()
 
+    print(query_data)
+
     # make problem dictionary
     problem = {}
     problem['problem_id'] = query_data[0][0]
@@ -113,21 +114,19 @@ def get_problem(cursor, problem_id):
     problem['solution'] = query_data[0][2]
     problem['hint'] = query_data[0][3]
     problem['level'] = query_data[0][4]
-    problem['step_criteria'] = query_data[0][5]
-    problem['step_score'] = query_data[0][6]
-    problem['competence'] = query_data[0][7]
-    problem['knowledge'] = query_data[0][8]
-    problem['sub_unit'] = query_data[0][9]
-    problem['main_unit'] = query_data[0][10]
-    problem['area'] = query_data[0][11]
+    problem['knowledge_score'] = query_data[0][5]
+    problem['sub_unit'] = query_data[0][6]
+    problem['main_unit'] = query_data[0][7]
+    problem['area'] = query_data[0][8]
     
     return problem
 
+# Get the student answer from DB
 def get_student_answer(cursor, student_id, problem_id):
     query = """
     SELECT
         student_answer,
-        step_score,
+        knowledge_score,
         feedback
     FROM
         Student_DB.Problem_Progress
@@ -145,11 +144,12 @@ def get_student_answer(cursor, student_id, problem_id):
     # make problem dictionary
     student_answer = {}
     student_answer['student_answer'] = query_data[0][0]
-    student_answer['step_score'] = query_data[0][1]
+    student_answer['knowledge_score'] = query_data[0][1]
     student_answer['feedback'] = query_data[0][2]
     
     return student_answer
 
+# Make system prompt
 def get_system_prompt(problem, student_answer):
     prompt = """
     Mathematics Problem Interactive Feedback Session
@@ -160,15 +160,16 @@ def get_system_prompt(problem, student_answer):
     - Question: {}
     - Correct Solution: {}
     - Hint for the problem: {}
-    - Criteria for each step: {}
-    - Score for each step: {}
-
+    - Related knowledge and its score: {}
+    - Related high-school math unit: {}
+    
     Student's Submission:
     - Answer: {}
-    - student's score for each step: {}
+    - student's score for each knowledge: {}
     - Feedback: {}
 
     Instructions:
+    - During the conversation, you should use Korean language.
     - Engage in a friendly and supportive conversation with the student.
     - Discuss the student's answer, highlighting what was done well and where improvements can be made.
     - Use the provided hint and correct solution to guide the student towards understanding any errors.
@@ -176,14 +177,110 @@ def get_system_prompt(problem, student_answer):
     - Encourage the student to ask questions and express any confusion for further clarification.
 
     """.format(
-        # problem['question'], problem['solution'], problem['hint'], 
-        # student_answer['student_answer'], student_answer['score'], 
-        # student_answer['feedback']
         problem['question'], problem['solution'], problem['hint'],
-        problem['step_criteria'], problem['step_score'],
-        student_answer['student_answer'], student_answer['step_score'],
+        problem['knowledge_score'], problem['main_unit'],
+        student_answer['student_answer'], student_answer['knowledge_score'],
         student_answer['feedback']
     )
     
     return prompt
+
+# Get or create session for chatbot
+def get_or_create_session(connection, cursor, student_id, problem_id):
+    """
+    Get existing or create a new session for given student_id and problem_id.
+    """
+    # Check if session exists
+    cursor.execute(
+        sql.SQL("SELECT Session_ID FROM Chat_DB.Session WHERE Student_ID = %s AND Problem_ID = %s"),
+        (student_id, problem_id)
+    )
+    result = cursor.fetchone()
+
+    # Create a new session if it doesn't exist
+    if result:
+        session_id = result[0]
+    else:
+        # 새로운 세션 추가
+        cursor.execute(
+            sql.SQL("INSERT INTO Chat_DB.Session (Student_ID, Problem_ID) VALUES (%s, %s) RETURNING Session_ID"),
+            (student_id, problem_id)
+        )
+        session_id = cursor.fetchone()[0]
+        connection.commit()
+
+    return session_id
+
+# Save message to DB
+def save_message(connection, cursor, session_id, is_student, message):
+    """
+    Save a message to the Chat_DB.Message table.
+    """
+    try:
+        cursor.execute(
+            sql.SQL("INSERT INTO chat_db.Message (session_id, is_Student, Message, Timestamp) VALUES (%s, %s, %s, NOW())"),
+            (session_id, is_student, message)
+        )
+        connection.commit()
+    except Exception as e:
+        print(f"Error saving message: {e}")
+        connection.rollback()
+
+# Load chat history from DB
+def load_chat_history(cursor, session_id):
+    """
+    Load previous AI-generated and user input messages from the database.
+    """
+    cursor.execute(
+        "SELECT is_Student, Message FROM Chat_DB.Message WHERE Session_ID = %s ORDER BY Timestamp",
+        (session_id,)
+    )
+    ai_messages = []
+    user_messages = []
+    for is_student, message in cursor.fetchall():
+        if is_student:
+            user_messages.append(message)
+        else:
+            ai_messages.append(message)
+    return user_messages, ai_messages
+
+# Build a list of messages including system, human and AI messages.
+def build_message_list(system_prompt):
+    """
+    Build a list of messages including system, human and AI messages.
+    """
+    # Start zipped_messages with the SystemMessage
+    zipped_messages = [SystemMessage(
+        content=system_prompt)]  # Add system message
+
+    # Zip together the past and generated messages
+    for human_msg, ai_msg in zip_longest(st.session_state['past'], st.session_state['generated']):
+        if human_msg is not None:
+            zipped_messages.append(HumanMessage(
+                content=human_msg))  # Add user messages
+        if ai_msg is not None:
+            zipped_messages.append(
+                AIMessage(content=ai_msg))  # Add AI messages
+
+    return zipped_messages
+
+# Generate AI response using the ChatOpenAI model.
+def generate_response(chat, system_prompt):
+    """
+    Generate AI response using the ChatOpenAI model.
+    """
+    # Build the list of messages
+    zipped_messages = build_message_list(system_prompt)
+
+    # Generate response using the chat model
+    ai_response = chat(zipped_messages)
+
+    return ai_response.content
+
+# Define function to submit user input
+def submit():
+    # Set entered_prompt to the current value of prompt_input
+    st.session_state.entered_prompt = st.session_state.prompt_input
+    # Clear prompt_input
+    st.session_state.prompt_input = ""
 
