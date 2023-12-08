@@ -1,5 +1,5 @@
 # Import required libraries
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 from itertools import zip_longest
 import psycopg2
 import streamlit as st
@@ -35,8 +35,8 @@ if 'system_prompt' not in st.session_state:
 # need to make new function to load the problem and student data from the database
 # def load_problem_and_student_data(problem_id, student_id):
 
-# Load environment variables
-load_dotenv()
+# # Load environment variables
+# load_dotenv()
 
 # Set streamlit page configuration
 st.set_page_config(page_title="Interactive ChatBot")
