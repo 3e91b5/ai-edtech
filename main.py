@@ -46,8 +46,9 @@ def session_state_reset():
 	# chatbot
 	st.session_state['api_key'] = None
 	st.session_state['openai_model'] = None
-	st.session_state['message'] = []
+	st.session_state['messages'] = []
 	st.session_state['gpt_session'] = False
+	st.session_state['session_id'] = None
 	st.session_state['gpt_client'] = None
 
 # after login, session_state is initialized by student info from the database
@@ -61,7 +62,20 @@ def session_state_login_init(account):
 	st.session_state['student_id'] = student_id
 	if db.is_admin(student_id):
 		st.session_state['admin'] = True
-        
+    
+    
+	# st.session_state['student_id'] = None
+	# st.session_state['account'] = None
+	# st.session_state['name'] = None
+	# st.session_state['login'] = False
+	# st.session_state['teacher'] = False
+	# st.session_state['admin'] = False
+	# st.session_state['api_key'] = None
+	# st.session_state['gpt_session'] = False
+	# st.session_state['gpt_client'] = None
+	# st.session_state['messages'] = []
+	# st.session_state['problem_id'] = [] 
+    
 # session state initialization
 if 'login' not in st.session_state: # should be changed to more clever way
 	print(datetime.datetime.now(), "init session state")
