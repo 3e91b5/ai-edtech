@@ -324,10 +324,6 @@ def update_unit_score(unit_id, student_id):
 	score = run_query(query_1)
 	if score.empty:
 		return False
-<<<<<<< HEAD
-
-=======
->>>>>>> 3995f1d (cherry-pick from main branch done)
 	query_2 = f"UPDATE student_db.unit_progress SET achievement = '{score}' WHERE student_id = '{student_id}' and unit_id = '{unit_id}'"
 	result = run_tx(query_2)
 	if result.empty:

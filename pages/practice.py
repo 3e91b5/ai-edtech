@@ -5,10 +5,7 @@ from streamlit_extras.switch_page_button import switch_page
 from PIL import Image
 import src.db as db
 import src.gpt as gpt
-<<<<<<< HEAD
-=======
 import pandas as pd
->>>>>>> 3995f1d (cherry-pick from main branch done)
 from io import StringIO
 
 ### 디자인 변경
