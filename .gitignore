@@ -13,5 +13,15 @@ content
 # key
 .streamlit/secrets.toml
 
+#test
+chatgpt_test.py
+
+# jupyter notebook file
+*.ipynb
+
 # commit code
 for_git_commit.ipynb
+
+# MATH dataset
+MATH/*
+MATH.tar
