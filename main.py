@@ -46,8 +46,9 @@ def session_state_reset():
 	# chatbot
 	st.session_state['api_key'] = None
 	st.session_state['openai_model'] = None
-	st.session_state['message'] = []
+	st.session_state['messages'] = []
 	st.session_state['gpt_session'] = False
+	st.session_state['session_id'] = None
 	st.session_state['gpt_client'] = None
 
 # after login, session_state is initialized by student info from the database
@@ -72,7 +73,7 @@ def session_state_login_init(account):
 	# st.session_state['api_key'] = None
 	# st.session_state['gpt_session'] = False
 	# st.session_state['gpt_client'] = None
-	# st.session_state['message'] = []
+	# st.session_state['messages'] = []
 	# st.session_state['problem_id'] = [] 
     
 # session state initialization

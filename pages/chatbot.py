@@ -30,8 +30,8 @@ def interactive_chatbot():
                 apikey = st.secrets["apikey"]
             gpt.set_apikey(apikey)
             
-            # response , st.session_state['gpt_client'] = gpt.run_gpt_helloworld()
-            # st.session_state.messages.append({"role": "assistant", "content": response})
+            response , st.session_state['gpt_client'] = gpt.run_gpt_helloworld()
+            st.session_state.messages.append({"role": "assistant", "content": response})
             # # st.write(response)
             
             # st.session_state initialized

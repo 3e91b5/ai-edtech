@@ -3,13 +3,13 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from datetime import datetime, date
-import os
+from langchain.utilities import SQLDatabase
+# import os
 
 import warnings
 warnings.filterwarnings("ignore")
 
 def init_connection():
-  global connection
   connection = psycopg2.connect(
   user = st.secrets['username'],
   password = st.secrets['password'],
@@ -17,6 +17,24 @@ def init_connection():
   port = st.secrets['port'],
   database = st.secrets['database'])
   return connection
+
+def init_db(include_tables = []):
+    user = st.secrets['username']
+    password = st.secrets['password']
+    host = st.secrets['host']
+    port = st.secrets['port']
+    database = st.secrets['database']
+
+    # Create the PostgreSQL URI used for connection
+    pg_uri = f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{database}"
+
+    # Create the SQLDatabase object
+    if include_tables == []:
+        db = SQLDatabase.from_uri(pg_uri)
+    else:
+        db = SQLDatabase.from_uri(pg_uri, include_tables=include_tables,sample_rows_in_table_info=2)
+
+    return db, pg_uri
 
 def run_query(query):
   global conn
@@ -354,6 +372,67 @@ def get_problem_list():
 	else:
 		return result
 	
+def get_problem(problem_id):
+    # connection = init_connection()
+    # cursor = connection.cursor()
+
+	p_query = """
+	SELECT
+		question,
+		knowledge_score
+	FROM
+		knowledge_map_db.problem
+	WHERE
+		problem_id = {}
+	LIMIT 1;
+	""".format(problem_id)
+
+	result = run_query(p_query)
+	if result.empty:
+		return False
+	else:
+		question = result['question'][0]
+		knowledge = result['knowledge_score'][0]
+		return question, knowledge
+	# 	return ques
+    # try:
+    #     cursor.execute(p_query)
+    #     p_query_data = cursor.fetchall()
+    #     question = p_query_data[0][0]
+    #     knowledge = p_query_data[0][1]
+    # except (Exception, psycopg2.Error) as error:
+    #     print("Error while connecting to PostgreSQL", error)
+    #     connection.rollback()
+    # return question, knowledge
+
+def get_answer(student_id, problem_id):
+
+	s_query = """
+	SELECT
+		student_answer
+	FROM
+		student_db.problem_progress
+	WHERE
+		student_id = {} AND
+		problem_id = {}
+	ORDER BY
+		Timestamp DESC
+	LIMIT 1;
+	""".format(student_id, problem_id)
+
+	result = run_query(s_query)
+	if result.empty:
+		return False
+	else:
+		student_answer = result['student_answer'][0]
+		return student_answer
+    # cursor.execute(s_query)
+    # s_query_data = cursor.fetchall()
+    # student_answer = s_query_data[0][0]
+
+    # print(student_answer)
+    # return student_answer\
+        
 # output = list of problem_id that 해당 student previously worked on
 # Menu 페이지에서 버튼 색상 구현할 때 사용
 def get_history(df, student_id):
@@ -535,3 +614,4 @@ def update_student_knowledge(student_id, knowledge_id):
 # competence:
 # competence_id:
 ##########################################################################
+
