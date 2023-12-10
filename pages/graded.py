@@ -46,8 +46,6 @@ if 'login' in st.session_state:
             menu_icon="cast", default_index=0, orientation="horizontal")
 
         st.subheader("문제 번호: "+str(problem_id))
-        problem = db.get_selected_problem(problem_id)
-        st.write(problem['question'][0])
         #qst = ast.literal_eval(answer["question"][0])
         st.write(answer["question"][0])
         st.markdown("***")

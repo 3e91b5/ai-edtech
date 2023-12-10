@@ -88,7 +88,7 @@ if 'login' in st.session_state:
                 
                 
                 st.success('답안 제출 성공')
-                switch_page('grade result')
+                switch_page('graded result')
             else:
                 st.error('답안 제출 실패')
             

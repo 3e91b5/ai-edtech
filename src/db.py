@@ -117,7 +117,7 @@ def is_admin(student_id):
 # output = dataframe with three columns (problem id - score - date when student solved the problem)
 # 범위 = 여태까지 푼 모든 문제 히스토리
 def get_all_score(student_id):
-	query = f"SELECT problem_id, total_score, timestamp FROM student_db.problem_progress WHERE student_id = '{student_id}'"
+	query = f"SELECT problem_id, score, timestamp FROM student_db.problem_progress WHERE student_id = '{student_id}'"
 	result = run_query(query)
 	if result.empty:
 		return False
@@ -127,7 +127,7 @@ def get_all_score(student_id):
 # output = scalar value that indicates the average "score" of 해당 student
 # 범위 = 여태까지 푼 모든 문제 히스토리
 def get_average_score(student_id):
-	query = f"SELECT AVG(total_score) FROM student_db.problem_progress WHERE student_id = '{student_id}'"
+	query = f"SELECT AVG(score) FROM student_db.problem_progress WHERE student_id = '{student_id}'"
 	result = run_query(query)
 	if result.empty:
 		return False
@@ -136,7 +136,7 @@ def get_average_score(student_id):
 
 # output = scalar value that indicates the score for 해당 problem id
 def get_score(student_id, problem_id):
-	query = f"SELECT total_score FROM student_db.problem_progress WHERE student_id = '{student_id}' and problem_id = '{problem_id}'"
+	query = f"SELECT score FROM student_db.problem_progress WHERE student_id = '{student_id}' and problem_id = '{problem_id}'"
 	result = run_query(query)
 	if result.empty:
 		return False
