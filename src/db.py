@@ -526,6 +526,16 @@ def update_graded_answer(problem_id, student_id, solved_answer):
 
 # output = dataframe with three columns (student_answer, step_score, total_score)
 # 		   dataframe rows are selected based on conditions: problem_id solved by the student
+def get_answer(problem_id, student_id):
+#ORDER BY Timestamp DESC LIMIT 1
+	query = f"SELECT * FROM student_db.problem_progress WHERE student_id = '{student_id}' AND problem_id = '{problem_id}'" 
+
+	result = run_query(query)
+	if result.empty:
+		return False
+	else:
+		return result
+
 
 # 5. CHAT WITH AI PAGE ---------------------------------------------------------------------------------------------------- #
 
