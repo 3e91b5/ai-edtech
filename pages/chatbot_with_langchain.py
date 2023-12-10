@@ -3,12 +3,14 @@ import src.gpt as gpt
 import src.db as db
 import streamlit as st
 from streamlit_chat import message
+from itertools import zip_longest
+import psycopg2
 from src.langchain import (
     get_problem, get_student_answer, get_system_prompt, 
     get_or_create_session, save_message, load_chat_history, 
     generate_response, submit)
 from langchain.chat_models import ChatOpenAI
-import time
+from streamlit_extras.switch_page_button import switch_page
 from dotenv import load_dotenv
 
 

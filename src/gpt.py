@@ -2,6 +2,7 @@ import requests
 from openai import OpenAI
 import streamlit as st
 import datetime
+import src.db as db
 
 
 def set_apikey(apikey):
@@ -53,7 +54,10 @@ def run_gpt(messages, client):
     return response
 
 # function for sending handwritten message and get latex to gpt-4-vision model
-def run_gpt_handwritten(url, client):
+def run_gpt_handwritten(url):
+    client = OpenAI(
+    api_key=get_apikey(),
+	)
     completion = client.chat.completions.create(
     model="gpt-4-vision-preview",
     messages=[
@@ -80,6 +84,8 @@ def scored(answer):
     return True
 
 
+
+knowledge_str = db.init_knowledge_str()
 # TEMPLATES: knowledge_map_db.problem
 
 templates = {}
