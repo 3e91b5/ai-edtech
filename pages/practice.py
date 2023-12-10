@@ -82,13 +82,11 @@ if 'login' in st.session_state:
             
             # file save name format: {student_id}_{problem_id}.{file_extension}
             uploaded_file.name = str(st.session_state['student_id']) +'_'+str(st.session_state['problem_id'])+  '.' + uploaded_file.name.split('.')[-1]
+            uploaded_file_url = 'content/'+ uploaded_file.name
             answer_uploaded = save_uploaded_file('content', uploaded_file) # save answer of student in local server TODO: need to change to save in DB
             
             if answer_uploaded:
-                
-                
                 st.success('답안 제출 성공')
-                switch_page('graded result')
             else:
                 st.error('답안 제출 실패')
             
@@ -119,8 +117,19 @@ if 'login' in st.session_state:
         # problem['hint'] 넣어야 함. 지금은 임의의 값
             st.toast('이 문제는 '+':red[힌트]'+' 개념을 활용해 풀 수 있어요!')
         if selected == "제출하기":
-#            switch_page('graded')
-            switch_page('graded Result')
+            
+            if uploaded_file is not None:
+                # TODO: image to latex
+                # TODO: grade latex answer
+                latex_answer = gpt.run_gpt_handwritten(uploaded_file_url)
+                
+                
+                
+                
+                
+                
+                switch_page('graded Result')
+            
     else:
         st.write("로그인이 필요합니다.")
         clicked = st.button("main")
