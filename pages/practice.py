@@ -5,9 +5,9 @@ from PIL import Image
 import src.db as db
 import src.gpt as gpt
 import pandas as pd
-from io import StringIO
-import datetime
-
+import io
+import base64
+from PIL import Image
 
 ### 디자인 변경
 # 수식 left align
@@ -59,8 +59,11 @@ def save_uploaded_file(directory, file):
 if 'login' in st.session_state:
     if st.session_state['login'] == True:
 
+        if 'problem_id' not in st.session_state:
+            st.session_state['problem_id'] = 195
+        
         problem_id = st.session_state['problem_id']
-        # problem_id = 200
+        student_id = st.session_state['student_id']
         problem = db.get_selected_problem(problem_id)
 
         selected = None
@@ -75,61 +78,31 @@ if 'login' in st.session_state:
 
         uploaded_file = st.file_uploader("Upload your answer image file (e.g. png, jpg, jpeg)")
         if uploaded_file is not None:
+            # # file save name format: {student_id}_{problem_id}.{file_extension}
+            # uploaded_file.name = str(st.session_state['student_id']) +'_'+str(st.session_state['problem_id'])+  '.' + uploaded_file.name.split('.')[-1]
+            # uploaded_file_url = 'content/'+ uploaded_file.name
+            # answer_uploaded = save_uploaded_file('content', uploaded_file) # save answer of student in local server TODO: need to change to save in DB
             
-            # print('st.session_state[student_id]: ',type( st.session_state['student_id']))
-            # print('st.session_state[problem_id]: ', type(st.session_state['problem_id']))
-            # print('uploaded_file.name: ', uploaded_file.name.split('.')[-1])
-            
-            # file save name format: {student_id}_{problem_id}.{file_extension}
-            uploaded_file.name = str(st.session_state['student_id']) +'_'+str(st.session_state['problem_id'])+  '.' + uploaded_file.name.split('.')[-1]
-            uploaded_file_url = 'content/'+ uploaded_file.name
-            answer_uploaded = save_uploaded_file('content', uploaded_file) # save answer of student in local server TODO: need to change to save in DB
-            
-            if answer_uploaded:
-                st.success('답안 제출 성공')
-            else:
-                st.error('답안 제출 실패')
-            
-
-            
-            # # To read file as bytes:
-            # bytes_data = uploaded_file.getvalue()
-            # st.write(bytes_data)
-
-            # # To convert to a string based IO:
-            # stringio = StringIO(uploaded_file.getvalue().decode("utf-8"))
-            # st.write(stringio)
-
-            # # To read file as string:
-            # string_data = stringio.read()
-            # st.write(string_data)
-
-            # # Can be used wherever a "file-like" object is accepted:
-            # dataframe = pd.read_csv(uploaded_file)
-            # st.write(dataframe)
-
-
-        # st.image(Image.open('answer_sample.png'))
+            # if answer_uploaded:
+            #     st.success('답안 제출 성공')
+            # else:
+            #     st.error('답안 제출 실패')
+            st.image(uploaded_file, use_column_width=True)
+            # base64_image = base64.b64encode(uploaded_file.read()).decode('utf-8')
+            # image_bytes = base64.b64decode(base64_image)
+            # st.image(image_bytes, use_column_width=True)
 
         if selected == "학습메뉴":
             switch_page('menu')
         if selected == "모르겠어요":
-        # problem['hint'] 넣어야 함. 지금은 임의의 값
-            st.toast('이 문제는 '+':red[힌트]'+' 개념을 활용해 풀 수 있어요!')
+            st.toast(problem['hint'][0])
+            
         if selected == "제출하기":
-            
             if uploaded_file is not None:
-                # TODO: image to latex
-                # TODO: grade latex answer
-                latex_answer = gpt.run_gpt_handwritten(uploaded_file_url)
-                
-                
-                
-                
-                
-                
+                gpt.grade_answer(student_id, problem_id,uploaded_file)
                 switch_page('graded Result')
-            
+            else:
+                st.toast("답안을 제출해주세요.")
     else:
         st.write("로그인이 필요합니다.")
         clicked = st.button("main")

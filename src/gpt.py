@@ -3,7 +3,12 @@ from openai import OpenAI
 import streamlit as st
 import datetime
 import src.db as db
-
+import base64
+from src.langchain import langchain_single_chat
+import requests
+from langchain.prompts import PromptTemplate
+import psycopg2
+from langchain.chat_models import ChatOpenAI
 
 def set_apikey(apikey):
 
@@ -162,7 +167,8 @@ Then, for each rule, concept, condition, or assumption, assign a score to the gi
 1 if applied correctly in the given answer
 
 Format your response as a comma separated list with values indicating the total score for each topic.
-Example of desired output is as follows: [1, 2.5, 0]
+Example of desired output is as follows: [1, 2.5, 0] 
+Your responses should consist of desired output format with no other comments, explanations, reasoning, or dialogue.
 """
 
 graded_result["feedback"] = """
@@ -182,42 +188,42 @@ Format your response as JSON with the following keys.
 
 
 Your responses should consist of valid JSON syntax, with no other comments, explanations, reasoning, or dialogue not consisting of valid JSON.
-Format of desired output is as follows: {score: 10, feedback: "문제를 잘 이해하고, 적절한 수학적 개념인 산술 기하 평균 부등식을 적용하여 문제를 풀었습니다. 주어진 식 $\frac{a}{b} + \frac{5b}{a}$에 대해 산술 기하 평균 부등식을 적용한 후, 두 항의 곱이 $5$임을 확인하고, 최소값이 $2\sqrt{5}$임을 정확하게 도출했습니다. 계산도 정확하게 수행되었습니다."}
-
+Format of desired output is as follows: {{score: 10, feedback: "문제를 잘 이해하고, 적절한 수학적 개념인 산술 기하 평균 부등식을 적용하여 문제를 풀었습니다. 주어진 식 $\\frac{{a}}{{b}} + \\frac{{5b}}{{a}}$에 대해 산술 기하 평균 부등식을 적용한 후, 두 항의 곱이 $5$임을 확인하고, 최소값이 $2\\sqrt{{5}}$임을 정확하게 도출했습니다. 계산도 정확하게 수행되었습니다."}}
 """
 
 graded_result["insert_answer"] = """
 You are a text-to-SQL translator that writes PostgreSQL code based on plain-language prompts.
 - Language: PostgreSQL
-- Table: student_db.problem_progress, columns = [student_answer text, knowledge_score integer[], feedback json]
+- Table: student_db.problem_progress, columns = [student_id int4, problem_id int4, student_answer text, knowledge_score _int4, score float8, correctness int4, feedback text]
 
 Return nothing but a ready-to-execute and syntactically-correct PostgreSQL query. Output only plain text. Do not output markdown.
-Format of desired output is as follows:
-INSERT INTO student_db.problem_progress (student_answer, knowledge_score, feedback)
-VALUES (
-  '다음 방정식 \\[2x^2 + y^2 + 8x - 10y + c = 0\\]의 그래프가 단일 점으로 이루어져 있다고 가정합니다.',
-  '{"step_1": "주어진 방정식을 타원의 표준형으로 재작성하려고 시도합니다. 두 변수에 대해 제곱을 완성하면 다음과 같습니다.", "step_2": "\\[\\begin{aligned} 2(x^2+4x) + (y^2-10y) + c &= 0 \\\\ 2(x^2+4x+4) + (y^2-10y+25) + c &= 33 \\\\ 2(x+2)^2 + (y-5)^2 &= 33-c."}',
-  '방정식을 타원의 표준형으로 변형시키고, 퇴화된 타원이 되려면 어떤 조건이 필요한지 생각해보세요.',
-  3,
-  '{"68": 1, "77": 1, "78": 1}'
+Example Format of desired output is as follows:
+INSERT INTO student_db.problem_progress (student_id, problem_id, student_answer, knowledge_score, score, correctness, feedback, timestamp)
+VALUES (12345678, 
+  1,
+  {"step 1": "$a$와 $b$가 양의 실수이므로, 산술평균-기하평균 부등식(AM-GM 부등식)을 적용할 수 있습니다.", "step 2": "AM-GM 부등식에 의해 $\frac{a}{b} + \frac{5b}{a} \geq 2\sqrt{\frac{a}{b} \cdot \frac{5b}{a}} = 2\sqrt{5}$입니다.", "step 3": "등호가 성립하는 경우는 $\frac{a}{b} = \frac{5b}{a}$일 때이므로, $a^2 = 5b^2$입니다.", "step 4": "따라서 최솟값은 $2\sqrt{5}$입니다."},
+  {1,1},
+  4.0,
+  0,
+  '최종 답은 틀렸으나 문제를 잘 이해하고, 적절한 수학적 개념을 적용하여 문제를 풀었습니다.',
+  '2023-12-01'
 );
 
 """
 
 
-import base64
-# Local에 이미지가 있는 경우 이미지를 Base64 형식으로 인코딩해 모델에 전달해야 함. "rb"는 binary IO (참고: https://yunwoong.tistory.com/285)
-def encode_image(image_path):
-    with open(image_path, "rb") as image_file:
-        return base64.b64encode(image_file.read()).decode('utf-8')
 
-def answer_to_latex(image_path):
-    # base64 문자열 얻기
-    base64_image = encode_image(image_path)
+
+
+def answer_to_latex(problem, uploaded_file):
+    # encode image to base64
+    base64_image = base64.b64encode(uploaded_file.read()).decode('utf-8')
+
+    api_key = st.secrets['apikey']
 
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {get_apikey()}"
+        "Authorization": f"Bearer {api_key}"
     }
 
     payload = {
@@ -228,26 +234,16 @@ def answer_to_latex(image_path):
             "content": [
               {
                 "type": "text",
-                "text": """
+                "text": f"""
 
                 In the url, you will see a handwritten answer to the math problem below.
                 Transcribe the handwritten answer, including mathematical notations, to text.
 
                 Below is a high-school math problem and solution. Mathematical notations are encapsulated in $.
 
-                1. math problem: 두 복소수 $c$, 즉 $c_1$과 $c_2$가 있어서 $-5 + 3i$, $8 - i$, 그리고 $c$가 정삼각형의 꼭짓점을 이룹니다. $c_1 c_2$의 곱을 구하세요.
+                1. math problem: {problem["question"]}
 
-                2. solution: {
-                "step 1": "$a = -5 + 3i$와 $b = 8 - i$라고 하고, $\\omega = e^{i \\pi/3}$라고 합시다. 그러면 $\\omega^3 = e^{i \\pi} = -1$이므로 $\\omega^3 + 1 = 0$이고, 이는 다음과 같이 인수분해됩니다: $(\\omega + 1)(\\omega^2 - \\omega + 1) = 0$. $\\omega \\neq -1$이므로 $\\omega^2 - \\omega + 1 = 0$입니다.",
-                "step 2": "$c_1$은 $b$를 $a$를 중심으로 반시계 방향으로 $\\pi/3$만큼 회전시켜서 얻을 수 있습니다. 이를 통해 $c_1 - a = \\omega (b - a)$이므로 $c_1 = \\omega (b - a) + a$입니다.",
-                "step 3": "$c_2$는 $a$를 $b$를 중심으로 반시계 방향으로 $\\pi/3$만큼 회전시켜서 얻을 수 있습니다. 이를 통해 $c_2 - b = \\omega (a - b)$이므로 $c_2 = \\omega (a - b) + b$입니다.",
-                "step 4": "그러면 $c_1 c_2 = [\\omega (b - a) + a][\\omega (a - b) + b] = -\\omega^2 (a - b)^2 + \\omega a(a - b) + \\omega b(b - a) + ab$입니다.",
-                "step 5": "$\\omega^2 - \\omega + 1 = 0$이므로 ($\\omega$는 원시 6번째 루트입니다), $\\omega^2 = \\omega - 1$이고, $c_1 c_2 = (1 - \\omega) (a - b)^2 + \\omega (a - b)^2 + ab = (a - b)^2 + ab$입니다.",
-                "step 6": "$a = -5 + 3i$와 $b = 8 - i$를 대입하면 $c_1 c_2 = (-5 + 3i)^2 - (-5 + 3i)(8 - i) + (8 - i)^2 = 116 - 75i$입니다."
-                }
-
-                Example of desired output: ""$a = -5 + 3i$와 $b = 8 - i$라고 하고, $\\omega = e^{i \\pi/3}$라고 합시다. $c_1 - a = \\omega (b - a)$이므로 $c_1 = \\omega (b - a) + a$입니다."
-
+                2. solution: {problem["solution"]}
                 """
               },
               {
@@ -262,9 +258,56 @@ def answer_to_latex(image_path):
         "max_tokens": 3000 # prompt가 이미 거의 token 2000개라, max_token 안 늘리면 답변 이상함!
     }
 
+    print(payload)
+
     response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
     print(response.json())
     # 'content' 부분만 추출하여 출력
     content = response.json()['choices'][0]['message']['content']
 
     return content
+
+def grade_answer(student_id, problem_id, image):
+    # Initialize chat models
+    gpt_4 = ChatOpenAI(model_name="gpt-4-1106-preview", temperature=0.3, api_key=st.secrets['apikey'])
+    gpt_3 = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.3, api_key=st.secrets['apikey'])
+
+    problem = db.get_selected_problem(problem_id)
+    student_answer = answer_to_latex(problem, image) # image_path 변수 정의해야 함
+
+    question = problem["question"]
+    knowledge = problem["knowledge_score"]
+
+    template_knowledge = PromptTemplate(
+        input_variables=[f"{question}", f"{knowledge}"],
+        template=graded_result["knowledge_score"]
+    )
+    prompt_knowledge = template_knowledge.format(question = question, knowledge = knowledge)
+
+    template_feedback = PromptTemplate(
+        input_variables=[f"{question}"],
+        template=graded_result["feedback"]
+    )
+    prompt_feedback = template_feedback.format(question = question)
+
+    knowledge_score = langchain_single_chat(gpt_4, prompt_knowledge, f"{student_answer}")
+    feedback = langchain_single_chat(gpt_4, prompt_feedback, f"{student_answer}")
+    # load date on timestamp
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d")
+    student_progress = f"student_id: {student_id}, problem_id: {problem_id}, student_answer: {student_answer}, knowledge_score: {knowledge_score}, {feedback}, timestamp: {timestamp}"
+    # print("answer_dct: ", student_progress)
+
+    insert_answer_query = langchain_single_chat(gpt_3, graded_result["insert_answer"], f"{student_progress}")
+    print("insert_answer_query: ", insert_answer_query)
+
+    connection = db.init_connection()
+    try:
+        cursor = connection.cursor()
+        cursor.execute(insert_answer_query)
+    except (Exception, psycopg2.Error) as error:
+        print("Error while connecting to PostgreSQL", error)
+        connection.rollback()
+    finally:
+        cursor.close()
+        connection.commit()
+

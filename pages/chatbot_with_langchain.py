@@ -13,12 +13,13 @@ from langchain.chat_models import ChatOpenAI
 from streamlit_extras.switch_page_button import switch_page
 from dotenv import load_dotenv
 
-
 # Load environment variables
 load_dotenv()
 
 # initialize session_state
 def init_page_variables(student_id, problem_id):
+    student_id = int(student_id)
+    problem_id = int(problem_id)
     # Generate or Load session_id
     st.write("student_id: ", student_id, "problem_id: ", problem_id)
     session_id = get_or_create_session(student_id, problem_id)
@@ -29,7 +30,8 @@ def init_page_variables(student_id, problem_id):
 
     # initialize chat object
     chat = ChatOpenAI(
-        api_key=st.session_state['api_key'],
+        
+        api_key = st.secrets['apikey'],
         temperature=0.3,
         model_name="gpt-4-1106-preview"
     )
@@ -44,7 +46,7 @@ if "student_id" not in st.session_state:
     st.session_state["student_id"] = 12345678  # 예시 학생 ID
 
 if "problem_id" not in st.session_state or st.session_state["problem_id"] is None:
-    st.session_state["problem_id"] = 1  # 예시 문제 ID
+    st.session_state["problem_id"] = 195  # 예시 문제 ID
 
 # 페이지 설정
 st.set_page_config(page_title="Interactive ChatBot")
@@ -66,6 +68,7 @@ if 'generated' not in st.session_state or 'past' not in st.session_state:
 
 if 'entered_prompt' not in st.session_state:
     st.session_state['entered_prompt'] = ""  # Store the latest user input
+
 
 if st.session_state.entered_prompt != "":
     # Get user input

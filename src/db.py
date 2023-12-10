@@ -470,6 +470,15 @@ def get_selected_problem(problem_id):
 	else:
 		return result
 
+def get_problem_progress(student_id, problem_id):
+	query = f"SELECT * FROM student_db.problem_progress WHERE problem_id = '{problem_id}' AND student_id = '{student_id}' ORDER BY problem_progress_id DESC LIMIT 1;"
+	result = run_query(query)
+	if result.empty:
+		return False
+	else:
+		return result
+
+
 '''
 # neo4j (지식요소 겹치는 문제들 연결 - 같은 단원 내로 한정)
 def get_related_problems(qid):
