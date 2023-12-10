@@ -3,7 +3,8 @@ from streamlit_option_menu import option_menu
 from streamlit_extras.switch_page_button import switch_page
 import src.db as db
 import json
-
+import ast
+import re
 ### 디자인 변경
 # 수식 left align
 st.markdown('''
@@ -33,7 +34,7 @@ if 'login' in st.session_state:
         student_id = st.session_state['student_id']
         # st.session_state['name'] 들어가야 함. 현재는 임의의 값 넣은 상태.
         name = '홍길동' 
-        answer = db.get_solution(problem_id)
+        answer = db.get_selected_problem(problem_id)
         solved_answer = db.get_answer(problem_id, student_id)
 
         selected = option_menu(None, ["채점결과", "학습메뉴", "챗봇과 얘기하기", "다음 문제로 이동"], # index 0 should be this page
@@ -41,28 +42,23 @@ if 'login' in st.session_state:
             menu_icon="cast", default_index=0, orientation="horizontal")
 
         st.subheader("문제 번호: "+str(problem_id))
-        # problem['question'] 들어가야 함. 아래는 임의로 입력한 값.
-        st.latex(r'''
-            \text{공정한 6면 주사위를 5번 던집니다. 2번 이하로 6이 나올 확률은 얼마인가요?}
-        ''')
+        problem = db.get_selected_problem(problem_id)
+        st.write(problem['question'][0])
         st.markdown("***")
-        # answer['solution'] 들어가야 함. 아래는 임의로 입력한 값.
-        st.subheader("정답 풀이")
-        st.latex(r'''
-        \text{정확히 2번 6이 나올 방법의 수는 }\binom{5}{2}5^3 \text{입니다.}  \\
-        \text{6이 나올 두 주사위를 고르는 방법이 }\binom{5}{2}\text{가지이고, 나머지 3개 주사위에 대해서는 각각 5가지 선택이 가능합니다.}  \\
-        \text{마찬가지로, 정확히 1번 6이 나올 방법의 수는 }\binom{5}{1}5^4\text{이며, 6이 한 번도 나오지 않는 방법의 수는 }\binom{5}{0}5^5\text{입니다.}  \\
-        \text{따라서 확률은 }\frac{\binom{5}{2}5^3+\binom{5}{1}5^4+\binom{5}{0}5^5}{6^5}=\frac{625}{648}\text{입니다.}
-        ''')
+
+        st.subheader("AI 해설")
+
+        test = answer["solution"][0]
+        unescaped_string = re.sub(r'\frac', r'\frac', test)
+        sol_dct = ast.literal_eval(unescaped_string)
+        for key, value in sol_dct.items():
+            st.write(key+": ")
+            st.write(value)
         st.markdown("***")
-        # solved_answer['solved'] 들어가야 함. 아래는 임의로 입력한 값.
+
         st.subheader(f"{st.session_state['name']}님의 답안")
-        st.latex(r'''
-        \text{6이 2번 나오는 경우의 수 = }\binom{5}{2}5^3  \\
-        \text{2개 주사위에서 6 나오려면}\binom{5}{2}\text{경우의 수 and 3개 주사위에서 1 부터 5 나온다}  \\
-        \text{6이 1번 나오는 경우의 수 = }\binom{5}{1}5^4\text{, 0번 나오는 경우의 수 = }\binom{5}{0}5^5  \\
-        \text{따라서 }\frac{\binom{5}{2}5^3+\binom{5}{1}5^4+\binom{5}{0}5^5}{6^5}=\frac{625}{648}
-        ''')
+        st.write(solved_answer['student_answer'][0])
+
         st.markdown("***")
 
         st.subheader("채점 결과")

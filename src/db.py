@@ -327,11 +327,18 @@ def get_student_grade(student_id):
 # 	else:
 # 		return result['grade'][0]
 
-
-# output = scalar value that ranges from 1 to 5, with 1 being the lowest level (공부 못하는 학생)
-# 문제 풀이 상황에 따라 dynamic하게 업데이트 되는 값 아님. 교사가 임의로 설정해준 값.
-def get_student_level(student_id):
-	query = f"SELECT level FROM student_db.students WHERE student_id = '{student_id}'"
+# output = list of unit name that matches student's grade (학년)
+# Menu 화면 display 용도
+def get_main_unit_name(grade):
+#	query = f"SELECT main_unit_name FROM knowledge_map_db.main_unit WHERE grade = {grade}"
+	query = f"""
+	SELECT knowledge_map_db.main_unit.main_unit_name FROM knowledge_map_db.main_unit 
+	INNER JOIN knowledge_map_db.sub_unit
+	ON knowledge_map_db.main_unit.main_unit_id = knowledge_map_db.sub_unit.main_unit_id
+	INNER JOIN knowledge_map_db.knowledge
+	ON knowledge_map_db.sub_unit.sub_unit_id = knowledge_map_db.knowledge.sub_unit_id
+	WHERE grade = '{grade}'
+	"""
 	result = run_query(query)
 	if result.empty:
 		return False
@@ -340,38 +347,48 @@ def get_student_level(student_id):
 
 # output = list of unit name that matches student's grade (학년)
 # Menu 화면 display 용도
-def get_unit_name(grade):
-	query = f"SELECT name FROM knowledge_map_db.sub_unit WHERE grade = {grade}"
+def get_sub_unit_name(grade):
+	query = f"SELECT sub_unit_name FROM knowledge_map_db.sub_unit WHERE grade = {grade}"
 	result = run_query(query)
 	if result.empty:
 		return False
 	else:
 		return result
 
-# output = scalar value of unit_id that corresponds to the unit_name selected 
-# unit_id로 바꾼 후 get_problems()에 input으로 넣을 용도
-def get_unit_id(unit_name):
-	query = f"SELECT unit_id FROM knowledge_map_db.sub_unit WHERE unit_name = {unit_name}"
+# output = list of unit name that matches student's grade (학년)
+# Menu 화면 display 용도
+def get_knowledge_name(grade):
+#	query = f"SELECT knowledge_name FROM knowledge_map_db.knowledge WHERE grade = {grade}"
+	query = f"""
+	SELECT knowledge_map_db.knowledge.knowledge_name FROM knowledge_map_db.knowledge 
+	INNER JOIN knowledge_map_db.sub_unit
+	ON knowledge_map_db.knowledge.sub_unit_id = knowledge_map_db.sub_unit.sub_unit_id
+	WHERE grade = '{grade}'
+	"""
+	result = run_query(query)
+	if result.empty:
+		return False
+	else:
+		return result
+
+# output = id that corresponds to the name selected 
+# name을 id로 바꾼 후 get_problem_list()에 input으로 넣을 용도
+def get_knowledge_id(knowledge_name):
+	query = f"SELECT knowledge_id FROM knowledge_map_db.knowledge WHERE knowledge_name = '{knowledge_name}'"
 	result = run_query(query)
 	if result.empty:
 		return False
 	else:
 		return result
 	
-# output = dataframe with two columns (problem_id and level) 
-# 		   dataframe rows are selected based on conditions: (i) unit_id selected by the student and (ii) student's level
-# db 완성되지 않은 상태라 지금은 어떤 unit_id 선택하든 결과 같음
-def get_problem_list():
-	#def get_problem_list(unit_id, student_id):
-	#level = get_student_level(student_id)
-	#query = f"SELECT problem_id, level FROM knowledge_map_db.problem WHERE unit_id = '{unit_id}' AND level = '{level}"
-	query = f"SELECT problem_id, level FROM knowledge_map_db.problem ORDER BY problem_id"
+def get_problem_list(knowledge_id):
+	query = f"SELECT problem_id FROM knowledge_map_db.problem WHERE knowledge_id = '{knowledge_id}' ORDER BY problem_id"
 	result = run_query(query)
 	if result.empty:
 		return False
 	else:
 		return result
-	
+
 def get_problem(problem_id):
     # connection = init_connection()
     # cursor = connection.cursor()
@@ -461,8 +478,6 @@ def get_student_competence(student_id):
 
 # output = one row of dataframe selected if problem_id is equal to what is (i) selected by the student or (ii) recommended by the system
 # output에 "정답" 답안지 및 배점 포함되어 있음. Question page, Graded result page 모두에서 사용하는 함수.
-# "채점 결과" 페이지에서 같은 input으로 함수 호출하므로 cache 해둠
-@st.cache
 def get_selected_problem(problem_id):
 	query = f"SELECT * FROM knowledge_map_db.problem WHERE problem_id = '{problem_id}'"
 	result = run_query(query)
@@ -529,7 +544,7 @@ def update_graded_answer(problem_id, student_id, solved_answer):
 # 		   dataframe rows are selected based on conditions: problem_id solved by the student
 # "학생이 작성한" 답안지 가져오는 쿼리
 def get_answer(problem_id, student_id):
-	query = f"SELECT student_answer, step_score, total_score FROM student_db.problem_progress WHERE problem_id = '{problem_id}' and student_id = '{student_id}' "
+	query = f"SELECT student_answer, knowledge_score, score FROM student_db.problem_progress WHERE problem_id = '{problem_id}' and student_id = '{student_id}' "
 	result = run_query(query)
 	if result.empty:
 		return False

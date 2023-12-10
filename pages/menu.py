@@ -12,24 +12,40 @@ if 'login' in st.session_state:
         ### 변수 가져오기
         student_id = st.session_state['student_id']
         grade = db.get_student_grade(student_id)
-        # st.write(f'grade is {grade}')
-        units = db.get_unit_name(grade)
+
+        main_units = db.get_main_unit_name(grade)
+        sub_units = db.get_sub_unit_name(grade)
+        knowledges = db.get_knowledge_name(grade)
 
         ### 화면 구성
         st.header("학습메뉴")
         col1, padding, col2, col3, col4, col5 = st.columns([3,1,2,2,2,2])
         with col1:
-            unit_id = st.selectbox(
-                "단원을 선택해주세요",
-                units,
+
+            main_unit = st.selectbox(
+                "대단원을 선택해주세요",
+                main_units,
                 index = None,
                 placeholder = "단원명",
                 )
 
-        if unit_id:
-            # 원래는 학생 level 반영해서 문제 리스트 가져옴
-            # problems = db.get_problems(unit_id, student_id)
-            problems = db.get_problems()
+            sub_unit = st.selectbox(
+                "소단원을 선택해주세요",
+                sub_units,
+                index = None,
+                placeholder = "단원명",
+                )
+
+            knowledge = st.selectbox(
+                "지식요소를 선택해주세요",
+                knowledges,
+                index = None,
+                placeholder = "단원명",
+                )
+
+        if knowledge:
+            knowledge_id = db.get_knowledge_id(knowledge)
+            problems = db.get_problem_list(knowledge_id)
             problems['solved'] = db.get_history(problems, student_id)
             for item in range(len(problems['problem_id'])):
                 if item < 3:
@@ -44,6 +60,8 @@ if 'login' in st.session_state:
                 else:
                     with col5:
                         app.question_buttons(problems, item)
+        else:
+            st.write("대단원, 소단원, 지식요소를 전부 선택해주세요.")
     else:
         st.write("로그인이 필요합니다.")
         clicked = st.button("main")
