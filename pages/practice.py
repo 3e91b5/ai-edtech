@@ -58,10 +58,9 @@ def save_uploaded_file(directory, file):
 ### 화면 구성
 if 'login' in st.session_state:
     if st.session_state['login'] == True:
-
-        if 'problem_id' not in st.session_state:
-            st.session_state['problem_id'] = 195
-        
+        if st.session_state['problem_id'] == None:
+            switch_page('menu')
+            
         problem_id = st.session_state['problem_id']
         student_id = st.session_state['student_id']
         problem = db.get_selected_problem(problem_id)
