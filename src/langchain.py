@@ -207,7 +207,7 @@ def get_or_create_session(student_id, problem_id):
         # 새로운 세션 추가
         cursor.execute(
             sql.SQL("INSERT INTO Chat_DB.Session (Student_ID, Problem_ID) VALUES (%s, %s) RETURNING Session_ID"),
-            (student_id, problem_id)
+            (int(student_id), int(problem_id))
         )
         session_id = cursor.fetchone()[0]
         st.session_state.connection.commit()

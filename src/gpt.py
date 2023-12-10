@@ -54,7 +54,10 @@ def run_gpt(messages, client):
     return response
 
 # function for sending handwritten message and get latex to gpt-4-vision model
-def run_gpt_handwritten(url, client):
+def run_gpt_handwritten(url):
+    client = OpenAI(
+    api_key=get_apikey(),
+	)
     completion = client.chat.completions.create(
     model="gpt-4-vision-preview",
     messages=[
