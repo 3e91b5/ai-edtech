@@ -605,6 +605,17 @@ def update_student_competence(student_id):
 def update_student_knowledge(student_id, knowledge_id):
 	return
 
+def check_connection():
+    try:
+        # st.session_state를 사용하여 연결 상태를 확인하고 관리합니다.
+        if 'connection' not in st.session_state or st.session_state.connection.closed != 0:
+            # 연결이 유효하지 않으면 새로운 연결을 생성합니다.
+            st.session_state.connection = init_connection()
+        return st.session_state.connection.cursor()
+    except:
+        # 연결 오류 발생 시 새 연결을 시도합니다.
+        st.session_state.connection = init_connection()
+        return st.session_state.connection.cursor()
 
 
 ################## Table: student_db.student_competence ##################

@@ -5,6 +5,8 @@ import src.db as db
 import json
 import ast
 import re
+import ast
+import re
 ### 디자인 변경
 # 수식 left align
 st.markdown('''
@@ -46,39 +48,72 @@ if 'login' in st.session_state:
         st.subheader("문제 번호: "+str(problem_id))
         problem = db.get_selected_problem(problem_id)
         st.write(problem['question'][0])
+        problem = db.get_selected_problem(problem_id)
+        st.write(problem['question'][0])
         st.markdown("***")
 
         st.subheader("AI 해설")
-
-        test = answer["solution"][0]
-        unescaped_string = re.sub(r'\frac', r'\frac', test)
-        sol_dct = ast.literal_eval(unescaped_string)
+        #unescaped_string = re.sub(r'\f', r'\\f', test)
+        #st.write(unescaped_string)
+        sol_dct = ast.literal_eval(answer["solution"][0])
         for key, value in sol_dct.items():
+            # /f가 whitespace로 인식되어 파이썬에서 자동 지워지기 때문에 정규식 수정해줘야 함
+            value = re.sub(r'\f', r'\\f', value)
             st.write(key+": ")
             st.write(value)
         st.markdown("***")
 
         st.subheader(f"{st.session_state['name']}님의 답안")
-        st.write(solved_answer['student_answer'][0])
+        ans_dct = ast.literal_eval(solved_answer['student_answer'][0])
+        for key, value in ans_dct.items():
+            # /f가 whitespace로 인식되어 파이썬에서 자동 지워지기 때문에 정규식 수정해줘야 함
+            value = re.sub(r'\f', r'\\f', value)
+            st.write(key+": ")
+            st.write(value)
 
+        st.markdown("***")
+        st.subheader("피드백")
+        st.write('''
+            총점은 5점입니다. 미적분을 사용하여 최솟값을 찾는 과정을 올바르게 시작했지만, 솔루션에 중대한 오류가 있습니다.
+
+            1. **임계점:**
+            - 도함수를 올바르게 찾았지만 부호 오류가 있습니다. 올바른 방정식은 \( f'(n) = \frac{1}{2} - \frac{18}{n^2} = 0 \)입니다.
+
+            2. **\(n\)에 대한 해:**
+            - \(n^2 = 36\)을 올바르게 풀었지만, 우리는 양의 정수와 관련이 있으므로 유효한 해는 \(n = 6\)이며, \(n = -6\)이 아닙니다.
+
+            3. **함수 평가:**
+            - 최솟값이 \(n = -6\)에서 발생한다고 잘못 기술했습니다. 이는 문제에 대한 유효한 해가 아닙니다. \(n\)은 양의 정수여야 합니다.
+
+            이러한 단계를 검토하고 필요한 수정을 가해주십시오.
+        ''')
         st.markdown("***")
 
         st.subheader("채점 결과")
-        step_criteria_json = answer['step_criteria'][0]
-        print(step_criteria_json)
-        # step_criteria = json.loads(answer['step_criteria'])
-        # print('answer', answer)
-        # print('solved_answer', solved_answer)
+        student_knowledge_score = solved_answer['knowledge_score'][0]
+        st.write(solved_answer['knowledge_score'])
+        st.write(student_knowledge_score)
+        student_total_score = solved_answer['score'][0]
+        problem_knowledge_score = problem['knowledge_score'][0]
+
         count = 0
-        for k in step_criteria_json:
+        #for k in problem_knowledge_score:
+        #    count +=1
+        #    st.markdown("{0}: {1}점 / {2}점".format(problem_knowledge_score[k], problem_knowledge_score[int(count)-1], student_total_score[int(count)-1]))
+
+        for key in problem_knowledge_score.keys():
             count +=1
-            st.markdown("{0}: {1}점 / {2}점".format(step_criteria_json[k], answer['step_score'][0][int(count)-1], solved_answer['step_score'][0][int(count)-1]))
+            st.write(key)
+            st.write(problem_knowledge_score[key])
+            st.write(student_total_score[int(count)-1])
+            #st.markdown("{0}: {1}점 / {2}점".format(key, problem_knowledge_score[key], student_total_score.values()[int(count)-1]))
 
-        # for i in range(len(step_criteria)):
-        #     st.markdown("{0}: {1}점 / {2}점".format(step_criteria.values()[i], answer['step_score'][i], solved_answer['score'][i]))
-
-        # st.subheader(":red[최종 점수: {0}점]".format(answer['total_score']))
-        st.subheader(":red[최종 점수: {0}점]".format(solved_answer['total_score'][0]))
+        st.markdown("***")
+        # st.subheader(":red[최종 점수: {0}점]".format(solved_answer['total_score'][0]))
+        st.subheader("지식요소별 이해도 (제가 새로 추가한 내용)")
+        st.markdown("로그의 밑의 변환 공식: 1점 / 1점")
+        st.markdown("로그의 여러 가지 공식: 2점 / 3점")
+        st.markdown("로그의 밑과 진수의 조건: 0.5점 / 1점")
 
         if selected == "학습메뉴":
             switch_page('menu')

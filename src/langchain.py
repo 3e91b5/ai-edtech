@@ -23,6 +23,7 @@ from langchain.schema import (
     HumanMessage,
     AIMessage
 )
+from src.db import check_connection
 
 def init_db(include_tables = []):
     """
@@ -72,7 +73,8 @@ def langchain_single_chat(chat, system_message, human_message):
   return response.content
 
 # Get the problem from DB
-def get_problem(cursor, problem_id):
+def get_problem(problem_id):
+    cursor = check_connection()
     query = """
     SELECT
         p.problem_id,
@@ -105,8 +107,6 @@ def get_problem(cursor, problem_id):
     cursor.execute(query)
     query_data = cursor.fetchall()
 
-    print(query_data)
-
     # make problem dictionary
     problem = {}
     problem['problem_id'] = query_data[0][0]
@@ -122,7 +122,9 @@ def get_problem(cursor, problem_id):
     return problem
 
 # Get the student answer from DB
-def get_student_answer(cursor, student_id, problem_id):
+def get_student_answer(student_id, problem_id):
+    cursor = check_connection()
+
     query = """
     SELECT
         student_answer,
@@ -186,14 +188,15 @@ def get_system_prompt(problem, student_answer):
     return prompt
 
 # Get or create session for chatbot
-def get_or_create_session(connection, cursor, student_id, problem_id):
+def get_or_create_session(student_id, problem_id):
+    cursor = check_connection()
     """
     Get existing or create a new session for given student_id and problem_id.
     """
     # Check if session exists
     cursor.execute(
         sql.SQL("SELECT Session_ID FROM Chat_DB.Session WHERE Student_ID = %s AND Problem_ID = %s"),
-        (student_id, problem_id)
+        (int(student_id), int(problem_id))
     )
     result = cursor.fetchone()
 
@@ -207,27 +210,33 @@ def get_or_create_session(connection, cursor, student_id, problem_id):
             (student_id, problem_id)
         )
         session_id = cursor.fetchone()[0]
-        connection.commit()
+        st.session_state.connection.commit()
 
     return session_id
 
 # Save message to DB
-def save_message(connection, cursor, session_id, is_student, message):
+def save_message(session_id, is_student, message):
+    cursor = check_connection()
     """
     Save a message to the Chat_DB.Message table.
     """
+    print(f"Saving message: {message}")
     try:
         cursor.execute(
             sql.SQL("INSERT INTO chat_db.Message (session_id, is_Student, Message, Timestamp) VALUES (%s, %s, %s, NOW())"),
             (session_id, is_student, message)
         )
-        connection.commit()
+        st.session_state.connection.commit()
     except Exception as e:
         print(f"Error saving message: {e}")
-        connection.rollback()
+        st.session_state.connection.rollback()
+    finally:
+        cursor.close()
+
 
 # Load chat history from DB
-def load_chat_history(cursor, session_id):
+def load_chat_history(session_id):
+    cursor = check_connection()
     """
     Load previous AI-generated and user input messages from the database.
     """

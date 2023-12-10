@@ -6,6 +6,7 @@ package.json
 # environment
 *__pycache__/
 .config
+.env
 
 # log
 content
