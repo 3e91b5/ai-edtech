@@ -5,7 +5,7 @@ from streamlit_extras.switch_page_button import switch_page
 import datetime
 import pandas as pd
 import src.db as db
-from st_pages import Page, Section, show_pages
+from st_pages import Page, Section, show_pages, hide_pages
 import base64
 
 st.set_page_config(
