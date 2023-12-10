@@ -97,27 +97,27 @@ Evaluate the Type feature in the given dataset. If Type is either Intermediate A
 Your responses should consist of either 1 or 0, with no other comments, explanations, reasoning, or dialogue.
 """
 
-templates["post_process"] = """
-You are a high school mathematics instructor. We will be processing data from the MATH dataset.
+# templates["post_process"] = """
+# You are a high school mathematics instructor. We will be processing data from the MATH dataset.
 
-Following is one example of the given data:
-Problem: "We roll a fair 6-sided die 5 times. What is the probability that we get a 6 in at most 2 of the rolls?"
-Level: "Level 5"
-Type: "Counting & Probability"
-Solution: (solution to the math problem)
+# Following is one example of the given data:
+# Problem: "We roll a fair 6-sided die 5 times. What is the probability that we get a 6 in at most 2 of the rolls?"
+# Level: "Level 5"
+# Type: "Counting & Probability"
+# Solution: (solution to the math problem)
 
-First, evaluate the Problem feature in the given dataset.
+# First, evaluate the Problem feature in the given dataset.
 
-Then, identify 1 to 3 math topic(s) within {knowledge_str}, in which knowledge_name refers to math topics covered in Korean high school math courses, that are *relevant* to the math problem.
-A *relevant* math topic covers mathematical rules, concepts, conditions, or assumptions that must applied to solving the math problem.
+# Then, identify 1 to 3 math topic(s) within {knowledge_str}, in which knowledge_name refers to math topics covered in Korean high school math courses, that are *relevant* to the math problem.
+# A *relevant* math topic covers mathematical rules, concepts, conditions, or assumptions that must applied to solving the math problem.
 
-Finally, return answer in JSON format (do not include any other comments, explanations, reasoning, or dialogue):
-question: text -> translate the Problem feature in the data into Korean (formal style) and encapsulate LaTeX expressions with $
-solution: json -> in Korean (formal style), create a step-by-step solution to the math question. Encapsulate LaTeX expressions with $. An example would be {example}
-hint: text -> in one to two sentences, provide a hint in Korean on how to approach and solve the problem
-level: int -> extract the number within the Level feature in the data
-knowledge_score: json -> key: each relevant math topic (knowledge_name) extracted from {knowledge_str}, value: total number of rules, mathematical concepts, conditions, or assumptions covered in the topic, which must be applied to solve the math problem
-""".format(example=example, knowledge_str=knowledge_str)
+# Finally, return answer in JSON format (do not include any other comments, explanations, reasoning, or dialogue):
+# question: text -> translate the Problem feature in the data into Korean (formal style) and encapsulate LaTeX expressions with $
+# solution: json -> in Korean (formal style), create a step-by-step solution to the math question. Encapsulate LaTeX expressions with $. An example would be {example}
+# hint: text -> in one to two sentences, provide a hint in Korean on how to approach and solve the problem
+# level: int -> extract the number within the Level feature in the data
+# knowledge_score: json -> key: each relevant math topic (knowledge_name) extracted from {knowledge_str}, value: total number of rules, mathematical concepts, conditions, or assumptions covered in the topic, which must be applied to solve the math problem
+# """.format(example=example, knowledge_str=knowledge_str)
 
 templates["insert_problem"] = """
 You are a text-to-SQL translator that writes PostgreSQL code based on plain-language prompts.

@@ -116,7 +116,7 @@ def is_admin(student_id):
 # output = dataframe with three columns (problem id - score - date when student solved the problem)
 # 범위 = 여태까지 푼 모든 문제 히스토리
 def get_all_score(student_id):
-	query = f"SELECT problem_id, total_score, timestamp FROM student_db.problem_progress WHERE student_id = '{student_id}'"
+	query = f"SELECT problem_id, score, timestamp FROM student_db.problem_progress WHERE student_id = '{student_id}'"
 	result = run_query(query)
 	if result.empty:
 		return False
@@ -126,7 +126,7 @@ def get_all_score(student_id):
 # output = scalar value that indicates the average "score" of 해당 student
 # 범위 = 여태까지 푼 모든 문제 히스토리
 def get_average_score(student_id):
-	query = f"SELECT AVG(total_score) FROM student_db.problem_progress WHERE student_id = '{student_id}'"
+	query = f"SELECT AVG(score) FROM student_db.problem_progress WHERE student_id = '{student_id}'"
 	result = run_query(query)
 	if result.empty:
 		return False
@@ -135,7 +135,7 @@ def get_average_score(student_id):
 
 # output = scalar value that indicates the score for 해당 problem id
 def get_score(student_id, problem_id):
-	query = f"SELECT total_score FROM student_db.problem_progress WHERE student_id = '{student_id}' and problem_id = '{problem_id}'"
+	query = f"SELECT score FROM student_db.problem_progress WHERE student_id = '{student_id}' and problem_id = '{problem_id}'"
 	result = run_query(query)
 	if result.empty:
 		return False
@@ -333,7 +333,7 @@ def get_student_level(student_id):
 # output = list of unit name that matches student's grade (학년)
 # Menu 화면 display 용도
 def get_unit_name(grade):
-	query = f"SELECT name FROM knowledge_map_db.sub_unit WHERE grade = {grade}"
+	query = f"SELECT sub_unit_name FROM knowledge_map_db.sub_unit WHERE grade = {grade}"
 	result = run_query(query)
 	if result.empty:
 		return False
@@ -343,7 +343,7 @@ def get_unit_name(grade):
 # output = scalar value of unit_id that corresponds to the unit_name selected 
 # unit_id로 바꾼 후 get_problems()에 input으로 넣을 용도
 def get_unit_id(unit_name):
-	query = f"SELECT unit_id FROM knowledge_map_db.sub_unit WHERE unit_name = {unit_name}"
+	query = f"SELECT sub_unit_id FROM knowledge_map_db.sub_unit WHERE unit_name = {unit_name}"
 	result = run_query(query)
 	if result.empty:
 		return False
@@ -517,11 +517,11 @@ def update_graded_answer(problem_id, student_id, solved_answer):
 	else:
 		return True
 
-# output = dataframe with three columns (student_answer, step_score, total_score)
+# output = dataframe with three columns (student_answer, step_score, score)
 # 		   dataframe rows are selected based on conditions: problem_id solved by the student
 # "학생이 작성한" 답안지 가져오는 쿼리
 def get_answer(problem_id, student_id):
-	query = f"SELECT student_answer, step_score, total_score FROM student_db.problem_progress WHERE problem_id = '{problem_id}' and student_id = '{student_id}' "
+	query = f"SELECT student_answer, step_score, score FROM student_db.problem_progress WHERE problem_id = '{problem_id}' and student_id = '{student_id}' "
 	result = run_query(query)
 	if result.empty:
 		return False
@@ -585,7 +585,7 @@ def update_student_knowledge(student_id, knowledge_id):
 # problem_id: foreign key
 # student_answer:
 # step_score:
-# total_score:
+# score:
 # correctness:
 # feedback:
 # timestamp:

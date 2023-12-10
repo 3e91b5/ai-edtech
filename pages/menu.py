@@ -33,7 +33,7 @@ if 'login' in st.session_state:
         if unit_id:
             # 원래는 학생 level 반영해서 문제 리스트 가져옴
             # problems = db.get_problems(unit_id, student_id)
-            problems = db.get_problems()
+            problems = db.get_problem_list()
             problems['solved'] = db.get_history(problems, student_id)
             for item in range(len(problems['problem_id'])):
                 if item < 3:

@@ -30,12 +30,12 @@ if 'login' in st.session_state:
         # both date(2023,11,27) and date.today() returns a date object
         today = date.today()
         now = datetime.now()
-        today = history[history['timestamp']==today][['problem_id','total_score']]
+        today = history[history['timestamp']==today][['problem_id','score']]
         
         history = pd.pivot_table(
             history,
             index='timestamp',
-            aggfunc={'total_score': np.mean, 'problem_id': len}
+            aggfunc={'score': np.mean, 'problem_id': len}
         ).rename(columns={'problem_id': 'count'}).apply(np.ceil).round(decimals = 1) # round decimal (np.mean)
         history.reset_index(inplace=True)
         # NOTE: data import할 때 datetime 형식으로 데이터가 로드되지 않음. AttributeError: Can only use .dt accessor with datetimelike values
@@ -78,7 +78,7 @@ if 'login' in st.session_state:
                 color = "#36454F"
 
             dict = {
-                "title": '성적: {0}/10점'.format(history['total_score'][i]),
+                "title": '성적: {0}/10점'.format(history['score'][i]),
                 "start": history['timestamp'][i],
                 "end": history['timestamp'][i],
                 "color": color,
@@ -94,9 +94,9 @@ if 'login' in st.session_state:
             today, 
             column_config={
                 "problem_id": "문항 번호", 
-                "total_score": st.column_config.ProgressColumn( 
+                "score": st.column_config.ProgressColumn( 
                     "문항별 점수 (10점 만점)",
-                    format="%f",
+                    format="%.1f",
                     min_value=0,
                     max_value=10,
                 ),
