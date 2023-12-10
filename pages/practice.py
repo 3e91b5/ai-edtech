@@ -41,8 +41,8 @@ st.markdown(
 if 'login' in st.session_state:
     if st.session_state['login'] == True:
 
-        # st.session_state['problem_id'] 들어가야 함. 현재는 임의의 값 넣은 상태.
-        problem_id = 1 
+        #problem_id = st.session_state['problem_id']
+        problem_id = 200
         problem = db.get_selected_problem(problem_id)
 
         selected = None
@@ -51,10 +51,7 @@ if 'login' in st.session_state:
             menu_icon="cast", default_index=0, orientation="horizontal")
 
         st.subheader("문제 번호: "+ str(problem_id))
-        # problem['question'] 들어감. 아래는 임의로 입력한 값.
-        st.latex(r'''
-            \text{공정한 6면 주사위를 5번 던집니다. 2번 이하로 6이 나올 확률은 얼마인가요?}
-        ''')
+        st.write(problem['question'][0])
         st.markdown("***")
         st.subheader("답안을 작성해주세요")
 

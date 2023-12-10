@@ -1,105 +1,92 @@
 # Import required libraries
-# from dotenv import load_dotenv
 import src.gpt as gpt
 import src.db as db
-from itertools import zip_longest
-import psycopg2
 import streamlit as st
 from streamlit_chat import message
-# import src.db as db
 from src.langchain import (
     get_problem, get_student_answer, get_system_prompt, 
     get_or_create_session, save_message, load_chat_history, 
     generate_response, submit)
 from langchain.chat_models import ChatOpenAI
-from langchain.schema import AIMessage, HumanMessage, SystemMessage
-from langchain.prompts import PromptTemplate
-from streamlit_extras.switch_page_button import switch_page
-import glob
-import json
-import os
-import random
 import time
+from dotenv import load_dotenv
 
 
-# def interactive_chatbot():
-# # todo: Need to load st.session_state["student_id"] and st.session_state["problem_id"] from the student's current problem page session
-st.session_state["student_id"] = 12345678  # Example student ID
-st.session_state["problem_id"] = 1  # Example problem ID
-# st.session_state["student_id"] = st.session_state['st.session_state["student_id"]']
-# st.session_state["problem_id"] = st.session_state['st.session_state["problem_id"]']
+# Load environment variables
+load_dotenv()
 
-# check the existence of connection and cursor 
-if 'cursor' not in st.session_state:
-    if 'connection' not in st.session_state:
-        connection = db.init_connection()
-    cursor = connection.cursor()
+# initialize session_state
+def init_page_variables(student_id, problem_id):
+    # Generate or Load session_id
+    st.write("student_id: ", student_id, "problem_id: ", problem_id)
+    session_id = get_or_create_session(student_id, problem_id)
+    # Load problem, student answer, system prompt
+    problem = get_problem(problem_id)
+    student_answer = get_student_answer(student_id, problem_id)
+    system_prompt = get_system_prompt(problem, student_answer)
 
-if 'session_id' not in st.session_state:
-    st.session_state["session_id"] = get_or_create_session(connection, cursor, st.session_state["student_id"], st.session_state["problem_id"])
+    # initialize chat object
+    chat = ChatOpenAI(
+        api_key=st.session_state['api_key'],
+        temperature=0.3,
+        model_name="gpt-4-1106-preview"
+    )
 
-# get problem, student answer from DB and make system prompt
-if 'problem' not in st.session_state:
-    st.session_state["problem"] = get_problem(cursor, st.session_state["problem_id"])
+    return session_id, problem, student_answer, system_prompt, chat
 
-if 'student_answer' not in st.session_state:
-    st.session_state["student_answer"] = get_student_answer(cursor, st.session_state["student_id"], st.session_state["problem_id"])
+if 'connection' not in st.session_state:
+    st.session_state.connection = db.init_connection()
 
-if 'system_prompt' not in st.session_state:
-    st.session_state["system_prompt"] = get_system_prompt(st.session_state["problem"], st.session_state["student_answer"])
+# student_id와 problem_id가 존재하는지 확인하고 설정
+if "student_id" not in st.session_state:
+    st.session_state["student_id"] = 12345678  # 예시 학생 ID
 
-# need to make new function to load the problem and student data from the database
-# def load_problem_and_student_data(st.session_state["problem_id"], st.session_state["student_id"]):
+if "problem_id" not in st.session_state or st.session_state["problem_id"] is None:
+    st.session_state["problem_id"] = 1  # 예시 문제 ID
 
-# # Load environment variables
-# load_dotenv()
-
-# Set streamlit page configuration
+# 페이지 설정
 st.set_page_config(page_title="Interactive ChatBot")
 st.title("Interactive ChatBot")
 
-# Display the problem and student answer as markdown 
-st.write("Problem: ", st.session_state["problem"]['question'])
-st.write("Student Answer: ", st.session_state["student_answer"]['student_answer'])
-st.write("Feedback: ", st.session_state["student_answer"]['feedback'])
+# 페이지 변수 초기화 함수 호출
+session_id, problem, student_answer, system_prompt, chat = init_page_variables(st.session_state['student_id'], st.session_state['problem_id'])
 
-# Initialize session state variables
+# 문제, 학생의 답변, 피드백 표시
+st.write("Problem: ", problem['question'])
+st.write("Student Answer: ", student_answer['student_answer'])
+st.write("Feedback: ", student_answer['feedback'])
+
+# 채팅 기록 불러오기
 if 'generated' not in st.session_state or 'past' not in st.session_state:
-    user_inputs, ai_generated = load_chat_history(cursor, st.session_state["session_id"])
-    print(user_inputs)
-    print(ai_generated)
+    user_inputs, ai_generated = load_chat_history(session_id)
     st.session_state['generated'] = ai_generated  # Store AI generated responses
     st.session_state['past'] = user_inputs  # Store past user inputs
 
 if 'entered_prompt' not in st.session_state:
     st.session_state['entered_prompt'] = ""  # Store the latest user input
 
-# Initialize the ChatOpenAI model
-if 'chat' not in st.session_state:
-    chat = ChatOpenAI(
-        # client = st.session_state['gpt_client'],
-        api_key= st.session_state['api_key'],
-        temperature=0.3,
-        model_name="gpt-4-1106-preview"
-    )
-
 if st.session_state.entered_prompt != "":
-    # Get user query
+    # Get user input
     user_query = st.session_state.entered_prompt
-    # Save user query to database
-    save_message(connection, cursor, st.session_state["session_id"], True, user_query)
-
+    # Save user input to database
+    save_message(session_id, True, user_query)
     # Append user query to past queries
     st.session_state.past.append(user_query)
-    
-    # Generate response
-    output = generate_response(chat, st.session_state["system_prompt"])
+
+    # Generate AI response
+    output = generate_response(chat, system_prompt)
 
     # Append AI response to generated responses
     st.session_state.generated.append(output)
+    
     # Save AI response to database
-    save_message(connection, cursor, st.session_state["session_id"], False, output)
+    save_message(session_id, False, output)
 
+    # Commit changes to database
+    st.session_state.connection.commit()
+
+
+# 채팅 인터페이스
 first_message = "안녕하세요. 당신의 학습을 도와줄 인공지능 챗봇입니다. 위의 피드백을 참고하여 어떤 도움을 얻고 싶으신가요?"
 message(first_message, key='first_message')
 
@@ -113,22 +100,13 @@ if st.session_state['generated']:
         # Display AI response
         message(st.session_state["generated"][i], key=str(i) + '_ai')
 
+
+    # # 새로운 메시지 추가
+    # message(entered_prompt, is_user=True, key=str(len(user_inputs)-1) + '_user')
+    # message(output, key=str(len(ai_generated)-1) + '_ai')
+
+    # 입력 필드 초기화
+    # st.session_state['prompt_input'] = ""
+
 # Create a text input box for user input
 st.text_input('YOU: ', key='prompt_input', on_change=submit)
-
-
-# if 'login' in st.session_state:
-#     if st.session_state['login'] == True:
-#         interactive_chatbot()
-        
-            
-#     else:
-#         st.write("로그인이 필요한 서비스입니다.")
-#         clicked = st.button("main")
-#         if clicked:
-#             switch_page("home")        
-# else:
-#     st.write("로그인이 필요한 서비스입니다.")
-#     clicked = st.button("main")
-#     if clicked:
-#         switch_page("home")
