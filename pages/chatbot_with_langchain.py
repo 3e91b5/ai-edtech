@@ -86,14 +86,27 @@ def insert_problem():
 
 image_3 = "/content/answer2.png"
 
-def grade_answer(student_id, problem_id, image_path):
-        # Initialize chat models
+def grade_answer(student_id, problem_id):
+    # Initialize chat models
     api_key = gpt.get_apikey()
     gpt_4 = ChatOpenAI(model_name="gpt-4-1106-preview", temperature=0.3, api_key=api_key)
     gpt_3 = ChatOpenAI(model_name="gpt-3.5-turbo-1106", temperature=0.3, api_key=api_key)
     
     question, knowledge = get_problem(problem_id)
-    student_answer = gpt.answer_to_latex(image_path) # image_path 변수 정의해야 함
+    
+    # get image_path from local server's content folder
+    image_path_no_extension = 'content/' + str(student_id) +'_'+str(problem_id)
+    for ext in ['png', 'jpg', 'jpeg']:
+        if os.path.exists(image_path_no_extension + '.' + ext):
+            image_path = image_path_no_extension + '.' + ext
+            break
+        
+    if not os.path.exists(image_path):
+        print("No image file found")
+        st.error("No image file found")
+        return
+    
+    student_answer = gpt.answer_to_latex(image_path) 
 
     template_knowledge = PromptTemplate(
         input_variables=[f"{question}", f"{knowledge}"],
