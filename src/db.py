@@ -432,34 +432,6 @@ def get_problem(problem_id):
     #     print("Error while connecting to PostgreSQL", error)
     #     connection.rollback()
     # return question, knowledge
-
-def get_answer(student_id, problem_id):
-
-	s_query = """
-	SELECT
-		student_answer
-	FROM
-		student_db.problem_progress
-	WHERE
-		student_id = {} AND
-		problem_id = {}
-	ORDER BY
-		Timestamp DESC
-	LIMIT 1;
-	""".format(student_id, problem_id)
-
-	result = run_query(s_query)
-	if result.empty:
-		return False
-	else:
-		student_answer = result['student_answer'][0]
-		return student_answer
-    # cursor.execute(s_query)
-    # s_query_data = cursor.fetchall()
-    # student_answer = s_query_data[0][0]
-
-    # print(student_answer)
-    # return student_answer\
         
 # output = list of problem_id that 해당 student previously worked on
 # Menu 페이지에서 버튼 색상 구현할 때 사용
@@ -554,14 +526,6 @@ def update_graded_answer(problem_id, student_id, solved_answer):
 
 # output = dataframe with three columns (student_answer, step_score, total_score)
 # 		   dataframe rows are selected based on conditions: problem_id solved by the student
-# "학생이 작성한" 답안지 가져오는 쿼리
-# def get_answer(problem_id, student_id):
-# 	query = f"SELECT student_answer, knowledge_score, score FROM student_db.problem_progress WHERE problem_id = '{problem_id}' and student_id = '{student_id}' "
-# 	result = run_query(query)
-# 	if result.empty:
-# 		return False
-# 	else:
-# 		return result
 
 # 5. CHAT WITH AI PAGE ---------------------------------------------------------------------------------------------------- #
 
