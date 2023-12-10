@@ -314,6 +314,17 @@ def set_user_password(student_id, new_password):
 
 # 2. MENU PAGE ------------------------------------------------------------------------------------------------------------ #
 
+def init_knowledge_str():
+	connection = init_connection()
+	cursor = connection.cursor()
+	query = "SELECT knowledge_id, knowledge_name FROM knowledge_map_db.knowledge;"
+	cursor.execute(query)
+	knowledge_table = 'knowledge_map_db.knowledge'
+	knowledge_columns = [description[0] for description in cursor.description]
+	knowledge_data = cursor.fetchall()
+	knowledge_str = f"{knowledge_table}, {knowledge_columns}, {knowledge_data}"
+	return knowledge_str
+
 # student_db.students 에서 각 정보를 가져오는 함수를 따로 짤 수도 있지만 get_student_info를 재사하는 방법도 있음
 def get_student_grade(student_id):
 	return get_student_info(student_id)['grade'][0]
@@ -330,15 +341,15 @@ def get_student_grade(student_id):
 # output = list of unit name that matches student's grade (학년)
 # Menu 화면 display 용도
 def get_main_unit_name(grade):
-#	query = f"SELECT main_unit_name FROM knowledge_map_db.main_unit WHERE grade = {grade}"
-	query = f"""
-	SELECT knowledge_map_db.main_unit.main_unit_name FROM knowledge_map_db.main_unit 
-	INNER JOIN knowledge_map_db.sub_unit
-	ON knowledge_map_db.main_unit.main_unit_id = knowledge_map_db.sub_unit.main_unit_id
-	INNER JOIN knowledge_map_db.knowledge
-	ON knowledge_map_db.sub_unit.sub_unit_id = knowledge_map_db.knowledge.sub_unit_id
-	WHERE grade = '{grade}'
-	"""
+	query = f"SELECT main_unit_name FROM knowledge_map_db.main_unit WHERE grade = {grade}"
+	# query = f"""
+	# SELECT knowledge_map_db.main_unit.main_unit_name FROM knowledge_map_db.main_unit 
+	# INNER JOIN knowledge_map_db.sub_unit
+	# ON knowledge_map_db.main_unit.main_unit_id = knowledge_map_db.sub_unit.main_unit_id
+	# INNER JOIN knowledge_map_db.knowledge
+	# ON knowledge_map_db.sub_unit.sub_unit_id = knowledge_map_db.knowledge.sub_unit_id
+	# WHERE grade = '{grade}'
+	# """
 	result = run_query(query)
 	if result.empty:
 		return False
@@ -395,8 +406,7 @@ def get_problem(problem_id):
 
 	p_query = """
 	SELECT
-		question,
-		knowledge_score
+		*
 	FROM
 		knowledge_map_db.problem
 	WHERE
@@ -408,9 +418,10 @@ def get_problem(problem_id):
 	if result.empty:
 		return False
 	else:
-		question = result['question'][0]
-		knowledge = result['knowledge_score'][0]
-		return question, knowledge
+		return result
+		# question = result['question'][0]
+		# knowledge = result['knowledge_score'][0]
+		# return question, knowledge
 	# 	return ques
     # try:
     #     cursor.execute(p_query)
@@ -453,11 +464,12 @@ def get_answer(student_id, problem_id):
 # output = list of problem_id that 해당 student previously worked on
 # Menu 페이지에서 버튼 색상 구현할 때 사용
 def get_history(df, student_id):
-	list = df['problem_id']
+	l = df['problem_id'].tolist()
 	solved = []
 	query = f"SELECT problem_id FROM student_db.problem_progress WHERE student_id = '{student_id}'"
 	result = run_query(query)
-	for q in list:
+	
+	for q in l:
 		if q in result['problem_id']:
 			solved.append(1)
 		else:
@@ -543,13 +555,13 @@ def update_graded_answer(problem_id, student_id, solved_answer):
 # output = dataframe with three columns (student_answer, step_score, total_score)
 # 		   dataframe rows are selected based on conditions: problem_id solved by the student
 # "학생이 작성한" 답안지 가져오는 쿼리
-def get_answer(problem_id, student_id):
-	query = f"SELECT student_answer, knowledge_score, score FROM student_db.problem_progress WHERE problem_id = '{problem_id}' and student_id = '{student_id}' "
-	result = run_query(query)
-	if result.empty:
-		return False
-	else:
-		return result
+# def get_answer(problem_id, student_id):
+# 	query = f"SELECT student_answer, knowledge_score, score FROM student_db.problem_progress WHERE problem_id = '{problem_id}' and student_id = '{student_id}' "
+# 	result = run_query(query)
+# 	if result.empty:
+# 		return False
+# 	else:
+# 		return result
 
 # 5. CHAT WITH AI PAGE ---------------------------------------------------------------------------------------------------- #
 

@@ -4,6 +4,7 @@ from streamlit_extras.switch_page_button import switch_page
 import src.db as db
 import src.app as app 
 from st_pages import show_pages_from_config, add_page_title
+import pandas as pd
 # add_page_title()
 # show_pages_from_config()
 
@@ -29,6 +30,7 @@ if 'login' in st.session_state:
                 placeholder = "단원명",
                 )
 
+            # should add code to change sub_units according to main_unit
             sub_unit = st.selectbox(
                 "소단원을 선택해주세요",
                 sub_units,
@@ -36,6 +38,7 @@ if 'login' in st.session_state:
                 placeholder = "단원명",
                 )
 
+            # should add code to change knowledge according to sub_unit
             knowledge = st.selectbox(
                 "지식요소를 선택해주세요",
                 knowledges,
@@ -43,10 +46,16 @@ if 'login' in st.session_state:
                 placeholder = "단원명",
                 )
 
-        if knowledge:
-            knowledge_id = db.get_knowledge_id(knowledge)
-            problems = db.get_problem_list(knowledge_id)
-            problems['solved'] = db.get_history(problems, student_id)
+        if main_unit and sub_unit and knowledge:
+            knowledge_id = db.get_knowledge_id(knowledge)['knowledge_id'][0]
+            problem_list = db.get_problem_list(knowledge_id)['problem_id'].tolist() # the list of problem_id which has the selected knowledge_id
+            
+            problems = pd.DataFrame()
+            for i in range(len(problem_list)):
+                problems = problems.append(db.get_problem(problem_list[i]), ignore_index=True)
+            
+            problems['solved'] = db.get_history(problems, student_id)   # append 'solved' column to problems dataframe
+
             for item in range(len(problems['problem_id'])):
                 if item < 3:
                     with col2:

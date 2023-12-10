@@ -2,6 +2,7 @@ import requests
 from openai import OpenAI
 import streamlit as st
 import datetime
+import src.db as db
 
 
 def set_apikey(apikey):
@@ -80,6 +81,8 @@ def scored(answer):
     return True
 
 
+
+knowledge_str = db.init_knowledge_str()
 # TEMPLATES: knowledge_map_db.problem
 
 templates = {}
