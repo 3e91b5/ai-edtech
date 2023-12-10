@@ -6,6 +6,8 @@ import src.db as db
 import src.gpt as gpt
 import pandas as pd
 from io import StringIO
+import datetime
+
 
 ### 디자인 변경
 # 수식 left align
@@ -36,12 +38,29 @@ st.markdown(
      """, unsafe_allow_html=True
 )
 
+import os
+
+# 파일 업로드 함수
+def save_uploaded_file(directory, file):
+    if not os.path.exists(directory): 
+        os.makedirs(directory)
+        
+    with open(os.path.join(directory, file.name) ,'wb') as f: 
+        f.write(file.getbuffer()) 
+    
+    if os.path.exists(os.path.join(directory, file.name)):
+        st.success('파일 업로드 성공')
+        return True
+    else:
+        st.error('파일 업로드 실패')
+        return False
+
 ### 화면 구성
 if 'login' in st.session_state:
     if st.session_state['login'] == True:
 
-        #problem_id = st.session_state['problem_id']
-        problem_id = 200
+        problem_id = st.session_state['problem_id']
+        # problem_id = 200
         problem = db.get_selected_problem(problem_id)
 
         selected = None
@@ -56,21 +75,40 @@ if 'login' in st.session_state:
 
         uploaded_file = st.file_uploader("Upload your answer image file (e.g. png, jpg, jpeg)")
         if uploaded_file is not None:
-            # To read file as bytes:
-            bytes_data = uploaded_file.getvalue()
-            st.write(bytes_data)
+            
+            # print('st.session_state[student_id]: ',type( st.session_state['student_id']))
+            # print('st.session_state[problem_id]: ', type(st.session_state['problem_id']))
+            # print('uploaded_file.name: ', uploaded_file.name.split('.')[-1])
+            
+            # file save name format: {student_id}_{problem_id}.{file_extension}
+            uploaded_file.name = str(st.session_state['student_id']) +'_'+str(st.session_state['problem_id'])+  '.' + uploaded_file.name.split('.')[-1]
+            answer_uploaded = save_uploaded_file('content', uploaded_file) # save answer of student in local server TODO: need to change to save in DB
+            
+            if answer_uploaded:
+                
+                
+                st.success('답안 제출 성공')
+                switch_page('grade result')
+            else:
+                st.error('답안 제출 실패')
+            
 
-            # To convert to a string based IO:
-            stringio = StringIO(uploaded_file.getvalue().decode("utf-8"))
-            st.write(stringio)
+            
+            # # To read file as bytes:
+            # bytes_data = uploaded_file.getvalue()
+            # st.write(bytes_data)
 
-            # To read file as string:
-            string_data = stringio.read()
-            st.write(string_data)
+            # # To convert to a string based IO:
+            # stringio = StringIO(uploaded_file.getvalue().decode("utf-8"))
+            # st.write(stringio)
 
-            # Can be used wherever a "file-like" object is accepted:
-            dataframe = pd.read_csv(uploaded_file)
-            st.write(dataframe)
+            # # To read file as string:
+            # string_data = stringio.read()
+            # st.write(string_data)
+
+            # # Can be used wherever a "file-like" object is accepted:
+            # dataframe = pd.read_csv(uploaded_file)
+            # st.write(dataframe)
 
 
         # st.image(Image.open('answer_sample.png'))
