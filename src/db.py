@@ -422,6 +422,9 @@ def get_problem_progress(student_id, problem_id):
 		return result
 
 
+    
+
+
 '''
 # neo4j (지식요소 겹치는 문제들 연결 - 같은 단원 내로 한정)
 def get_related_problems(qid):
@@ -506,6 +509,36 @@ def update_chat():
 # 1) subject / area / main unit / sub unit 별 progress (해당하는 문제들 전부 풀었는지 여부)
 # 2) 역량, 지식 요소 progress 
 # subject / area / main unit / sub unit 별 평균 성적은 따로 db에 저장하지 않고, 필요시 쿼리로 계산
+
+
+def update_student_progress(student_id,  problem_id):
+    print('update_student_progress', student_id, problem_id)
+    query = f"SELECT knowledge_id FROM knowledge_map_db.problem WHERE problem_id = '{problem_id}'"
+    result = run_query(query)
+    knowledge_id = result['knowledge_id'][0]
+    
+    query = f"SELECT sub_unit_id FROM knowledge_map_db.knowledge WHERE knowledge_id = '{knowledge_id}'"
+    result = run_query(query)
+    sub_unit_id = result['sub_unit_id'][0]
+    
+    query = f"SELECT main_unit_id FROM knowledge_map_db.sub_unit WHERE sub_unit_id = '{sub_unit_id}'"
+    result = run_query(query)
+    main_unit_id = result['main_unit_id'][0]
+    
+    query = f"SELECT area_id FROM knowledge_map_db.main_unit WHERE main_unit_id = '{main_unit_id}'"
+    result = run_query(query)
+    area_id = result['area_id'][0]
+    
+    query = f"SELECT subject_id FROM knowledge_map_db.area WHERE area_id = '{area_id}'"
+    result = run_query(query)
+    subject_id = result['subject_id'][0]
+    
+    update_subject_progress(student_id, subject_id)
+    update_area_progress(student_id, area_id)
+    update_mainunit_progress(student_id, main_unit_id)
+    update_subunit_progress(student_id, sub_unit_id)	
+    update_student_knowledge(student_id, knowledge_id)
+    
 
 # update progress (value 0 if incomplete, 1 if complete) for each sub-unit (소단원)
 # "completion" indicates that the student solved all questions within each unit
@@ -626,7 +659,8 @@ def update_student_competence(student_id):
 	
 # update student's progress for each 지식 요소
 def update_student_knowledge(student_id, knowledge_id):
-	return
+	query = f"INSERT INTO student_db.knowledge_progress (student_id, knowledge_id) VALUES ('{student_id}', '{knowledge_id}')"
+	run_tx(query)
 
 def check_connection():
     try:
