@@ -152,30 +152,43 @@ VALUES (
 
 graded_result = {}
 
+knowledge_str = db.init_knowledge_str()
 graded_result["knowledge_score"] = """
 You are a high school mathematics instructor who needs to grade the given answer to a math question.
 
-Question: {question}
+Below is a high-school math problem and solution. 
+
+1. problem: {question}
+
+2. solution: {solution}
+
 
 In {knowledge}, key indicates math topics covered in Korean high school math courses that are *relevant* to this math problem. value indicates the number of rules, mathematical concepts, conditions, and assumptions that must be applied to solve this math question.
 A *relevant* math topic covers mathematical rules, concepts, conditions, or assumptions that must applied to solving the math problem.
 
-First, identify rules, mathematical concepts, conditions, or assumptions covered in each math topic that must be applied to solve the math problem
-Then, for each rule, concept, condition, or assumption, assign a score to the given answer according to the following criteria:
+Then, identify rules, mathematical concepts, conditions, or assumptions covered in each math topic that must be applied to solve the math problem
+Finally, for each rule, concept, condition, or assumption, assign a score to the handwritten answer according to the following criteria:
 0 if not applied in the given answer
 0.5 if applied incorrectly in the given answer
 1 if applied correctly in the given answer
 
-Format your response as a comma separated list with values indicating the total score for each topic.
-Example of desired output is as follows: [1, 2.5, 0] 
+Format your response as a comma separated list with values indicating the total score for each topic. Length of the list MUST match the number of *relevant* math topics for this question.
+Examples:
+    If number of relevant math topics is three, desired output is as follows: [1, 2.5, 0]
+    If number of relevant math topics is six, desired output is as follows: [1, 2.5, 0, 0.5, 1, 1]
+
 Your responses should consist of desired output format with no other comments, explanations, reasoning, or dialogue.
 """
 
 graded_result["feedback"] = """
 You are a high school mathematics instructor who needs to grade the given answer to a math question.
-To do so, you must first create a step by step solution to the given math question and compare it with the given answer.
+To do so, you must compare the given solution with the given answer.
 
-Question: {question}
+Below is a high-school math problem and solution. 
+
+1. math problem: {question}
+
+2. solution: {solution}
 
 When evaluating the answer, pay attention to whether the student:
 - comprehends the problem and considers any assumptions being made
@@ -236,10 +249,16 @@ def answer_to_latex(problem, uploaded_file):
                 "type": "text",
                 "text": f"""
 
-                In the url, you will see a handwritten answer to the math problem below.
-                Transcribe the handwritten answer, including mathematical notations, to text.
+                In the url is a handwritten answer to a high-school level math problem.
+                Transcribe the handwritten answer, which is written in Korean, to text. 
+                Your response will be used to display mathematical equations on a website using the Streamlit library in Python.
+                Format your response appropriately with line breaks (two whitespace followed by double backslash) according to the screen size.
+                screen size: -------------------------------------------------------------------------------------------------------------------
 
-                Below is a high-school math problem and solution. Mathematical notations are encapsulated in $.
+                Do NOT wrap mathematical notations with dollar signs or square brackets. Notate whitespace as \quad.
+                Double check your response; Make sure ALL text and mathematical notations in the image are included. Do not paraphrase.
+
+                Below is a high-school math problem and solution. 
 
                 1. math problem: {problem["question"]}
 
@@ -258,10 +277,10 @@ def answer_to_latex(problem, uploaded_file):
         "max_tokens": 3000 # prompt가 이미 거의 token 2000개라, max_token 안 늘리면 답변 이상함!
     }
 
-    print(payload)
+    # print(payload)
 
     response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
-    print(response.json())
+    # print(response.json())
     # 'content' 부분만 추출하여 출력
     content = response.json()['choices'][0]['message']['content']
 
@@ -276,19 +295,20 @@ def grade_answer(student_id, problem_id, image):
     student_answer = answer_to_latex(problem, image) # image_path 변수 정의해야 함
 
     question = problem["question"]
+    solution = problem["solution"]
     knowledge = problem["knowledge_score"]
 
     template_knowledge = PromptTemplate(
-        input_variables=[f"{question}", f"{knowledge}"],
+        input_variables=[f"{question}", f"{solution}",f"{knowledge}"],
         template=graded_result["knowledge_score"]
     )
-    prompt_knowledge = template_knowledge.format(question = question, knowledge = knowledge)
+    prompt_knowledge = template_knowledge.format(question = question, solution = solution, knowledge = knowledge)
 
     template_feedback = PromptTemplate(
-        input_variables=[f"{question}"],
+        input_variables=[f"{question}", f"{solution}"],
         template=graded_result["feedback"]
     )
-    prompt_feedback = template_feedback.format(question = question)
+    prompt_feedback = template_feedback.format(question = question, solution = solution)
 
     knowledge_score = langchain_single_chat(gpt_4, prompt_knowledge, f"{student_answer}")
     feedback = langchain_single_chat(gpt_4, prompt_feedback, f"{student_answer}")
@@ -297,17 +317,17 @@ def grade_answer(student_id, problem_id, image):
     student_progress = f"student_id: {student_id}, problem_id: {problem_id}, student_answer: {student_answer}, knowledge_score: {knowledge_score}, {feedback}, timestamp: {timestamp}"
     # print("answer_dct: ", student_progress)
 
-    insert_answer_query = langchain_single_chat(gpt_3, graded_result["insert_answer"], f"{student_progress}")
-    print("insert_answer_query: ", insert_answer_query)
+    insert_answer_query = langchain_single_chat(gpt_4, graded_result["insert_answer"], f"{student_progress}")
+    # print("insert_answer_query: ", insert_answer_query)
 
     connection = db.init_connection()
-    try:
-        cursor = connection.cursor()
-        cursor.execute(insert_answer_query)
-    except (Exception, psycopg2.Error) as error:
-        print("Error while connecting to PostgreSQL", error)
-        connection.rollback()
-    finally:
-        cursor.close()
-        connection.commit()
+    # try:
+    cursor = connection.cursor()
+    cursor.execute(insert_answer_query)
+    # except (Exception, psycopg2.Error) as error:
+        # print("Error while connecting to PostgreSQL", error)
+        # connection.rollback()
+    # finally:
+    cursor.close()
+    connection.commit()
 

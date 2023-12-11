@@ -6,8 +6,6 @@ import src.db as db
 import json
 import ast
 import re
-import ast
-import re
 ### 디자인 변경
 # 수식 left align
 st.markdown('''
@@ -43,30 +41,30 @@ if 'login' in st.session_state:
         name = st.session_state['name']
         answer = db.get_selected_problem(st.session_state['problem_id'])
 
-        problem_progress = db.get_problem_progress(student_id, st.session_state['problem_id'])
+        problem_progress = db.get_problem_progress(student_id,st.session_state['problem_id'])
 
         selected = option_menu(None, ["채점결과", "학습메뉴", "챗봇과 얘기하기", "다음 문제로 이동"], # index 0 should be this page
             icons=['', 'house', 'chat', 'arrow-right-square'],
             menu_icon="cast", default_index=0, orientation="horizontal")
-
+                
         st.subheader("문제 번호: "+str(st.session_state['problem_id']))
         problem = db.get_selected_problem(st.session_state['problem_id'])
         st.write(problem['question'][0])
         st.markdown("***")
 
         st.subheader(f"{st.session_state['name']}님의 답안")
-        # ans_dct = ast.literal_eval(problem_progress['student_answer'][0])
-        # for key, value in ans_dct.items():
-        #     # /f가 whitespace로 인식되어 파이썬에서 자동 지워지기 때문에 정규식 수정해줘야 함
-        #     value = re.sub(r'\f', r'\\f', value)
-        #     st.write(key+": ")
-        #     st.write(value)
-        st.write(problem_progress['student_answer'][0])
-
+        #ans_dct = ast.literal_eval(problem_progress['student_answer'][0])
+        #for key, value in ans_dct.items():
+        #    # /f가 whitespace로 인식되어 파이썬에서 자동 지워지기 때문에 정규식 수정해줘야 함
+        #    value = re.sub(r'\f', r'\\f', value)
+        #    st.markdown(" - {0}".format(value))
+        st.latex(problem_progress['student_answer'][0])
         st.markdown("***")
+
         st.subheader("피드백")
         st.write(problem_progress['feedback'][0])
         st.markdown("***")
+
         st.subheader("채점 결과")
         # student_knowledge_score = problem_progress['knowledge_score'][0]
         # st.write(problem_progress['knowledge_score'])
@@ -78,10 +76,14 @@ if 'login' in st.session_state:
         problem_knowledge_score = answer['knowledge_score'][0]
         st.markdown("총 점수: {0}점/10점".format(student_total_score))
         st.markdown("지식요소별 이해도")
+
         count = 0
         for key in problem_knowledge_score.keys():
-            count +=1
-            st.markdown(" - {0}: {1}점 / {2}점".format(key, student_knowledge_score[int(count)-1],problem_knowledge_score[key]))
+            if count > 2:
+                continue
+            else:
+                count +=1
+                st.markdown(" - {0}: {1}점 / {2}점".format(key, student_knowledge_score[int(count)-1],problem_knowledge_score[key]))
 
         st.markdown("***")
 

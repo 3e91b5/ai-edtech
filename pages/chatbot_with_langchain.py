@@ -5,6 +5,8 @@ import streamlit as st
 from streamlit_chat import message
 from itertools import zip_longest
 import psycopg2
+import ast
+import re
 from src.langchain import (
     get_problem, get_student_answer, get_system_prompt, 
     get_or_create_session, save_message, load_chat_history, 
@@ -21,7 +23,7 @@ def init_page_variables(student_id, problem_id):
     student_id = int(student_id)
     problem_id = int(problem_id)
     # Generate or Load session_id
-    st.write("student_id: ", student_id, "problem_id: ", problem_id)
+    st.write("학생 ID: ", student_id, "문제 번호: ", problem_id)
     session_id = get_or_create_session(student_id, problem_id)
     # Load problem, student answer, system prompt
     problem = get_problem(problem_id)
@@ -56,8 +58,16 @@ st.title("Interactive ChatBot")
 session_id, problem, student_answer, system_prompt, chat = init_page_variables(st.session_state['student_id'], st.session_state['problem_id'])
 
 # 문제, 학생의 답변, 피드백 표시
-st.write("Problem: ", problem['question'])
-st.write("Student Answer: ", student_answer['student_answer'])
+st.write("문제: ", problem['question'])
+#st.write("Student Answer: ", student_answer['student_answer'])
+st.write("학생 답안: ")
+st.latex(student_answer['student_answer'])
+
+# ans_dct = ast.literal_eval(student_answer['student_answer'])
+# for key, value in ans_dct.items():
+#     # /f가 whitespace로 인식되어 파이썬에서 자동 지워지기 때문에 정규식 수정해줘야 함
+#     value = re.sub(r'\f', r'\\f', value)
+#     st.markdown(" - {0}".format(value))
 st.write("Feedback: ", student_answer['feedback'])
 
 # 채팅 기록 불러오기
