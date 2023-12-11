@@ -143,30 +143,9 @@ def get_score(student_id, problem_id):
 	else:
 		return result
 
-# output = list of elements that indicate the average "score" of 해당 student - 해당 sub_unit
-# 범위 = input으로 들어온 sub_unit
-def get_subunit_score(student_id):
-	return
-
-# output = list of elements that indicates the average "score" of 해당 student - 해당 main_unit
-# 범위 = input으로 들어온 main_unit
-def get_mainunit_score(student_id):
-	return
-
-# output = list of elements that indicates the average "score" of 해당 student - 해당 area
-# 범위 = input으로 들어온 area
-def get_area_score(student_id):
-	return
-
-# output = list of elements that indicates the average "score" of 해당 student - 해당 subject
-# 범위 = input으로 들어온 subject
-def get_subject_score(student_id):
-	return
-
 # output = list of elements (1 or 0) that indicate whether student "completed" each sub-unit (소단원)
-# we use unit_id for sub unit ID and main_unit_id for main unit ID
 def get_subunit_progress(student_id):
-	query = f"SELECT unit_id FROM student_db.unit_progress WHERE student_id = '{student_id}' and achievement = 1"
+	query = f"SELECT sub_unit_id, completion FROM student_db.sub_unit_progress WHERE student_id = '{student_id}'"
 	result = run_query(query)
 	if result.empty:
 		return False
@@ -174,10 +153,9 @@ def get_subunit_progress(student_id):
 		return result
 
 # output = list of elements (1 or 0) that indicate whether student "completed" each main-unit (대단원)
-# we use unit_id for sub unit ID and main_unit_id for main unit ID
 # student "completes" main_unit iff he / she "completes" all sub_units included in the main_unit
 def get_mainunit_progress(student_id):
-	query = f"SELECT main_unit_id FROM student_db.unit_progress WHERE student_id = '{student_id}' and achievement = 1"
+	query = f"SELECT main_unit_id, completion FROM student_db.main_unit_progress WHERE student_id = '{student_id}'"
 	result = run_query(query)
 	if result.empty:
 		return False
@@ -186,8 +164,8 @@ def get_mainunit_progress(student_id):
 
 # output = list of elements (1 or 0) that indicate whether student "completed" each area
 # student "completes" area iff he / she "completes" all main_units included in the area
-def get_mainunit_progress(student_id):
-	query = f"SELECT area_id FROM student_db.area_progress WHERE student_id = '{student_id}' and achievement = 1"
+def get_area_progress(student_id):
+	query = f"SELECT area_id, completion FROM student_db.area_progress WHERE student_id = '{student_id}'"
 	result = run_query(query)
 	if result.empty:
 		return False
@@ -196,8 +174,8 @@ def get_mainunit_progress(student_id):
 
 # output = list of elements (1 or 0) that indicate whether student "completed" each subject
 # student "completes" subject iff he / she "completes" all area included in the subject
-def get_mainunit_progress(student_id):
-	query = f"SELECT subject_id FROM student_db.subject_progress WHERE student_id = '{student_id}' and achievement = 1"
+def get_subject_progress(student_id):
+	query = f"SELECT subject_id, completion FROM student_db.subject_progress WHERE student_id = '{student_id}'"
 	result = run_query(query)
 	if result.empty:
 		return False
@@ -209,19 +187,7 @@ def get_mainunit_progress(student_id):
 # 위 함수들은 progress를 완료 vs. 미완료로 정의. 반면 이 함수에선 각 unit / area / subject 에 속한 문제 중 몇 % 풀었는지로 정의. 
 def get_progress(student_id):
 	grade = get_student_grade(student_id)
-	# query = f"SELECT knowledge_map_db.subject.subject_name, knowledge_map_db.area.area_name, knowledge_map_db.main_unit.main_unit_name, 
-	# knowledge_map_db.sub_unit.unit_name, knowledge_map_db.problem.problem_id
-	# FROM knowledge_map_db.subject
-	# INNER JOIN knowledge_map_db.area
-	# ON knowledge_map_db.subject.subject_id = knowledge_map_db.area.subject_id
-	# INNER JOIN knowledge_map_db.main_unit
-	# ON knowledge_map_db.area.area_id = knowledge_map_db.main_unit.area_id
-	# INNER JOIN knowledge_map_db.sub_unit
-	# ON knowledge_map_db.main_unit.main_unit_id = knowledge_map_db.sub_unit.main_unit_id
-	# INNER JOIN knowledge_map_db.problem
-	# ON knowledge_map_db.sub_unit.unit_id = knowledge_map_db.problem.unit_id
-	# WHERE grade = '{grade}'"
-	query = f"SELECT knowledge_map_db.subject.subject_name, knowledge_map_db.area.area_name, knowledge_map_db.main_unit.main_unit_name, knowledge_map_db.sub_unit.unit_name, knowledge_map_db.problem.problem_id FROM knowledge_map_db.subject INNER JOIN knowledge_map_db.area	ON knowledge_map_db.subject.subject_id = knowledge_map_db.area.subject_id INNER JOIN knowledge_map_db.main_unit ON knowledge_map_db.area.area_id = knowledge_map_db.main_unit.area_id INNER JOIN knowledge_map_db.sub_unit ON knowledge_map_db.main_unit.main_unit_id = knowledge_map_db.sub_unit.main_unit_id INNER JOIN knowledge_map_db.problem ON knowledge_map_db.sub_unit.unit_id = knowledge_map_db.problem.unit_id WHERE grade = '{grade}'"
+	query = f"SELECT knowledge_map_db.subject.subject_name, knowledge_map_db.area.area_name, knowledge_map_db.main_unit.main_unit_name, knowledge_map_db.sub_unit.unit_name, knowledge_map_db.knowledge.knowledge_name, knowledge_map_db.problem_problem_id FROM knowledge_map_db.subject INNER JOIN knowledge_map_db.area ON knowledge_map_db.subject.subject_id = knowledge_map_db.area.subject_id INNER JOIN knowledge_map_db.main_unit ON knowledge_map_db.area.area_id = knowledge_map_db.main_unit.area_id INNER JOIN knowledge_map_db.sub_unit ON knowledge_map_db.main_unit.main_unit_id = knowledge_map_db.sub_unit.main_unit_id INNER JOIN knowledge_map_db.knowledge ON knowledge_map_db.sub_unit.sub_unit_id = knowledge_map_db.knowledge.sub_unit_id INNER JOIN knowledge_map_db.problem ON knowledge_map_db.knowledge.knowledge_id = knowledge_map_db.problem.knowledge_id WHERE grade = '{grade}'"
 	result = run_query(query)
 	if result.empty:
 		return False
@@ -239,14 +205,9 @@ def get_progress(student_id):
 
 	return result
 
-# get student's knowledge progress -> TBD
-def get_knowledge_progress(student_id):
-	return
-
 # get student's competence level -> TBD
 def get_competence(student_id):
 	return 
-
 
 ### UPDATE INFO ###
 
@@ -329,27 +290,10 @@ def init_knowledge_str():
 def get_student_grade(student_id):
 	return get_student_info(student_id)['grade'][0]
 
-# output = scalar value that indicates student's school grade (학년)
-# def get_student_grade(student_id):
-# 	query = f"SELECT grade FROM student_db.students WHERE student_id = '{student_id}'"
-# 	result = run_query(query)
-# 	if result.empty:
-# 		return False
-# 	else:
-# 		return result['grade'][0]
-
 # output = list of unit name that matches student's grade (학년)
 # Menu 화면 display 용도
 def get_main_unit_name(grade):
 	query = f"SELECT main_unit_name FROM knowledge_map_db.main_unit WHERE grade = {grade}"
-	# query = f"""
-	# SELECT knowledge_map_db.main_unit.main_unit_name FROM knowledge_map_db.main_unit 
-	# INNER JOIN knowledge_map_db.sub_unit
-	# ON knowledge_map_db.main_unit.main_unit_id = knowledge_map_db.sub_unit.main_unit_id
-	# INNER JOIN knowledge_map_db.knowledge
-	# ON knowledge_map_db.sub_unit.sub_unit_id = knowledge_map_db.knowledge.sub_unit_id
-	# WHERE grade = '{grade}'
-	# """
 	result = run_query(query)
 	if result.empty:
 		return False
@@ -369,7 +313,6 @@ def get_sub_unit_name(grade):
 # output = list of unit name that matches student's grade (학년)
 # Menu 화면 display 용도
 def get_knowledge_name(grade):
-#	query = f"SELECT knowledge_name FROM knowledge_map_db.knowledge WHERE grade = {grade}"
 	query = f"""
 	SELECT knowledge_map_db.knowledge.knowledge_name FROM knowledge_map_db.knowledge 
 	INNER JOIN knowledge_map_db.sub_unit
@@ -470,24 +413,14 @@ def get_selected_problem(problem_id):
 	else:
 		return result
 
-def get_problem_progress(student_id, problem_id):
-	query = f"SELECT * FROM student_db.problem_progress WHERE problem_id = '{problem_id}' AND student_id = '{student_id}' ORDER BY problem_progress_id DESC LIMIT 1;"
-	result = run_query(query)
-	if result.empty:
-		return False
-	else:
-		return result
-
-
-'''
-# neo4j (지식요소 겹치는 문제들 연결 - 같은 단원 내로 한정)
-def get_related_problems(qid):
-	query = f"MATCH ({qid : $qid})-[*]-(connected) RETURN connected"
-	return
-
-# neo4j (역량요소별로.. 배점 제일 높은 문제들 연결)
-def get_capacity_problems(cid):
-	return
+#get_answer()와 동일한 함수라 지움.
+#def get_problem_progress(student_id, problem_id):
+#	query = f"SELECT * FROM student_db.problem_progress WHERE problem_id = '{problem_id}' AND student_id = '{student_id}' ORDER BY problem_progress_id DESC LIMIT 1;"
+#	result = run_query(query)
+#	if result.empty:
+#		return False
+#	else:
+#		return result
 
 # 추천 문제 제시
 def get_recommend_problem(unit_id, student_id, problem_id):
@@ -512,7 +445,7 @@ def get_recommend_problem(unit_id, student_id, problem_id):
 		return False
 
 	return nqid
-'''
+
 
 # 4. GRADED RESULTS PAGE ---------------------------------------------------------------------------------------------------- #
 
@@ -537,7 +470,7 @@ def update_graded_answer(problem_id, student_id, solved_answer):
 # 		   dataframe rows are selected based on conditions: problem_id solved by the student
 def get_answer(problem_id, student_id):
 #ORDER BY Timestamp DESC LIMIT 1
-	query = f"SELECT * FROM student_db.problem_progress WHERE student_id = '{student_id}' AND problem_id = '{problem_id}'" 
+	query = f"SELECT * FROM student_db.problem_progress WHERE student_id = '{student_id}' AND problem_id = '{problem_id}' ORDER BY problem_progress_id LIMIT 1;" 
 
 	result = run_query(query)
 	if result.empty:
@@ -563,6 +496,10 @@ def update_chat():
 # 2) 역량, 지식 요소 progress 
 # subject / area / main unit / sub unit 별 평균 성적은 따로 db에 저장하지 않고, 필요시 쿼리로 계산
 
+# update student's progress for each 지식 요소
+def update_knowledge_progress(student_id, knowledge_id):
+	return
+
 # update progress (value 0 if incomplete, 1 if complete) for each sub-unit (소단원)
 # "completion" indicates that the student solved all questions within each unit
 def update_subunit_progress(student_id):
@@ -584,9 +521,6 @@ def update_subject_progress(student_id):
 def update_student_competence(student_id):
 	return
 	
-# update student's progress for each 지식 요소
-def update_student_knowledge(student_id, knowledge_id):
-	return
 
 def check_connection():
     try:
