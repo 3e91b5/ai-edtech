@@ -431,6 +431,7 @@ def get_related_problems(qid):
 # neo4j (역량요소별로.. 배점 제일 높은 문제들 연결)
 def get_capacity_problems(cid):
 	return
+'''
 
 # 추천 문제 제시
 def get_recommend_problem(unit_id, student_id, problem_id):
