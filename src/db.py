@@ -310,6 +310,29 @@ def get_sub_unit_name(grade):
 	else:
 		return result
 
+def get_sub_unit_name_by_main_unit(main_unit_name):
+	# query = f"SELECT main_unit_id FROM knowledge_map_db.main_unit WHERE main_unit_name = '{main_unit_name}'"
+	# result = run_query(query)
+	# main_unit_id = result['main_unit_id'][0]
+
+	# query = f"SELECT sub_unit_name FROM knowledge_map_db.sub_unit WHERE main_unit_id = '{main_unit_id}'"
+	# result = run_query(query)
+	
+	#Join query
+	query = f"""SELECT knowledge_map_db.sub_unit.sub_unit_name 
+				FROM knowledge_map_db.sub_unit 
+				INNER JOIN knowledge_map_db.main_unit 
+				ON knowledge_map_db.sub_unit.main_unit_id = knowledge_map_db.main_unit.main_unit_id 
+				WHERE knowledge_map_db.main_unit.main_unit_name = '{main_unit_name}'
+			"""
+	result = run_query(query)
+	
+	
+	if result.empty:
+		return False
+	else:
+		return result
+
 # output = list of unit name that matches student's grade (학년)
 # Menu 화면 display 용도
 def get_knowledge_name(grade):
@@ -324,6 +347,20 @@ def get_knowledge_name(grade):
 		return False
 	else:
 		return result
+
+def get_knowledge_name_by_sub_unit(sub_unit_name):
+	query = f"""
+	SELECT knowledge_map_db.knowledge.knowledge_name FROM knowledge_map_db.knowledge 
+	INNER JOIN knowledge_map_db.sub_unit
+	ON knowledge_map_db.knowledge.sub_unit_id = knowledge_map_db.sub_unit.sub_unit_id
+	WHERE sub_unit_name = '{sub_unit_name}'
+	"""
+	result = run_query(query)
+	if result.empty:
+		return False
+	else:
+		return result
+
 
 # output = id that corresponds to the name selected 
 # name을 id로 바꾼 후 get_problem_list()에 input으로 넣을 용도
