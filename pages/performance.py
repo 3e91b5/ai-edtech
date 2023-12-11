@@ -77,8 +77,10 @@ if 'login' in st.session_state:
             else:
                 color = "#36454F"
 
+            title = '{:.0f}문제({:.0f}/10점)'.format(history['count'][i], history['score'][i])
+
             dict = {
-                "title": '성적: {0}/10점'.format(history['score'][i]),
+                "title": title,
                 "start": history['timestamp'][i],
                 "end": history['timestamp'][i],
                 "color": color,

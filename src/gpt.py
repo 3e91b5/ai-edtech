@@ -181,8 +181,7 @@ Your responses should consist of desired output format with no other comments, e
 """
 
 graded_result["feedback"] = """
-You are a high school mathematics instructor who needs to grade the given answer to a math question.
-To do so, you must compare the given solution with the given answer.
+You are a high school mathematics teacher responsible for grading a student's solution to a math problem.
 
 Below is a high-school math problem and solution. 
 
@@ -190,15 +189,19 @@ Below is a high-school math problem and solution.
 
 2. solution: {solution}
 
-When evaluating the answer, pay attention to whether the student:
-- comprehends the problem and considers any assumptions being made
-- identifies and applies relevant rules, mathematical concepts, conditions, and assumptions
-- executes arithmetic calculations with precision
+When evaluating the student's solution, consider the following:
+- Does the student demonstrate a basic understanding of the problem and its assumptions?
+- Are mathematical concepts, rules, and conditions identified and applied reasonably, even if not perfectly?
+- Is the arithmetic mostly accurate, allowing for minor errors?
+
+Score the answer on a scale of 0 to 10, following these guidelines:
+- Award full marks (10) if the answer is correct and the logic in the solution is largely sound, even if minor mistakes are present.
+- Assign partial credit generously for steps that show a good attempt at reasoning, even if they are not fully correct.
+- Only assign low scores for clear misunderstandings of fundamental concepts or significant arithmetic errors.
 
 Format your response as JSON with the following keys.
 (1) score (value between 0 and 10): Give extra points for steps that require mathematical reasoning. Assign lower scores for steps that do not require mathematical reasoning skills. Examples include steps that "simplify expressions" or “do arithmetic calculations.”
-(2) feedback (text): In Korean, explain why the student gets a certain score. guide the student through his solution step by step, highlighting areas where errors were made.
-
+(2) feedback (text): Provide feedback in Korean, offering constructive comments on the student's solution. Highlight areas of success as well as any mistakes or misconceptions.
 
 Your responses should consist of valid JSON syntax, with no other comments, explanations, reasoning, or dialogue not consisting of valid JSON.
 Format of desired output is as follows: {{score: 10, feedback: "문제를 잘 이해하고, 적절한 수학적 개념인 산술 기하 평균 부등식을 적용하여 문제를 풀었습니다. 주어진 식 $\\frac{{a}}{{b}} + \\frac{{5b}}{{a}}$에 대해 산술 기하 평균 부등식을 적용한 후, 두 항의 곱이 $5$임을 확인하고, 최소값이 $2\\sqrt{{5}}$임을 정확하게 도출했습니다. 계산도 정확하게 수행되었습니다."}}
@@ -289,7 +292,7 @@ def answer_to_latex(problem, uploaded_file):
 def grade_answer(student_id, problem_id, image):
     # Initialize chat models
     gpt_4 = ChatOpenAI(model_name="gpt-4-1106-preview", temperature=0.3, api_key=st.secrets['apikey'])
-    gpt_3 = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.3, api_key=st.secrets['apikey'])
+    gpt_3 = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.2, api_key=st.secrets['apikey'])
 
     problem = db.get_selected_problem(problem_id)
     student_answer = answer_to_latex(problem, image) # image_path 변수 정의해야 함
@@ -317,7 +320,7 @@ def grade_answer(student_id, problem_id, image):
     student_progress = f"student_id: {student_id}, problem_id: {problem_id}, student_answer: {student_answer}, knowledge_score: {knowledge_score}, {feedback}, timestamp: {timestamp}"
     # print("answer_dct: ", student_progress)
 
-    insert_answer_query = langchain_single_chat(gpt_4, graded_result["insert_answer"], f"{student_progress}")
+    insert_answer_query = langchain_single_chat(gpt_3, graded_result["insert_answer"], f"{student_progress}")
     # print("insert_answer_query: ", insert_answer_query)
 
     connection = db.init_connection()
