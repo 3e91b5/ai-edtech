@@ -24,8 +24,7 @@ show_pages(
         Page("pages/menu.py", "Menu"),
         Page("pages/practice.py", "Question"),
         Page("pages/graded.py", "Graded Result"),
-        Page("pages/chatbot.py", "Chat with ai", ':question:'),
-        Page("pages/chatbot_with_langchain.py", "Chat with ai2", ':question:'),
+        Page("pages/chatbot_with_langchain.py", "Chat with ai", ':question:'),
         # Section(name="SignUp", icon=':pencil:'),
         Page("pages/signup.py", "SignUp"),
     ]
