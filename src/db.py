@@ -479,6 +479,9 @@ def get_problem_progress(student_id, problem_id):
 		return result
 
 
+    
+
+
 '''
 # neo4j (지식요소 겹치는 문제들 연결 - 같은 단원 내로 한정)
 def get_related_problems(qid):
@@ -563,22 +566,148 @@ def update_chat():
 # 2) 역량, 지식 요소 progress 
 # subject / area / main unit / sub unit 별 평균 성적은 따로 db에 저장하지 않고, 필요시 쿼리로 계산
 
+
+def update_student_progress(student_id,  problem_id):
+    print('update_student_progress', student_id, problem_id)
+    query = f"SELECT knowledge_id FROM knowledge_map_db.problem WHERE problem_id = '{problem_id}'"
+    result = run_query(query)
+    knowledge_id = result['knowledge_id'][0]
+    
+    query = f"SELECT sub_unit_id FROM knowledge_map_db.knowledge WHERE knowledge_id = '{knowledge_id}'"
+    result = run_query(query)
+    sub_unit_id = result['sub_unit_id'][0]
+    
+    query = f"SELECT main_unit_id FROM knowledge_map_db.sub_unit WHERE sub_unit_id = '{sub_unit_id}'"
+    result = run_query(query)
+    main_unit_id = result['main_unit_id'][0]
+    
+    query = f"SELECT area_id FROM knowledge_map_db.main_unit WHERE main_unit_id = '{main_unit_id}'"
+    result = run_query(query)
+    area_id = result['area_id'][0]
+    
+    query = f"SELECT subject_id FROM knowledge_map_db.area WHERE area_id = '{area_id}'"
+    result = run_query(query)
+    subject_id = result['subject_id'][0]
+    
+    update_subject_progress(student_id, subject_id)
+    update_area_progress(student_id, area_id)
+    update_mainunit_progress(student_id, main_unit_id)
+    update_subunit_progress(student_id, sub_unit_id)	
+    update_student_knowledge(student_id, knowledge_id)
+    
+
 # update progress (value 0 if incomplete, 1 if complete) for each sub-unit (소단원)
 # "completion" indicates that the student solved all questions within each unit
-def update_subunit_progress(student_id):
-	return
+def update_subunit_progress(student_id, sub_unit_id):
+    
+    # check existence
+	query = f"SELECT * FROM student_db.sub_unit_progress WHERE student_id = '{student_id}' AND sub_unit_id = '{sub_unit_id}'"
+	result = run_query(query)
+
+	if result.empty:# make new row
+		query = f"INSERT INTO student_db.sub_unit_progress VALUES (student_id, sub_unit_id, completion) ('{student_id}', '{sub_unit_id}', 0)"
+		run_tx(query)
+
+	# if student complete all knowledge within the sub_unit, update completion to 1
+	
+	# get list of all knowledge_id where student complete the knowledge
+	query = f"SELECT knowledge_id from student_db.knowledge_progress WHERE student_id = '{student_id}' AND completion = 1"
+	result = run_query(query)
+	knowledge_id_list_done = result['knowledge_id'].tolist()
+	
+	# get list of all knowledge_id from knowledge_map_db.knowledge that belong to the sub-unit
+	query = f"SELECT knowledge_id FROM knowledge_map_db.knowledge WHERE sub_unit_id = '{sub_unit_id}'"
+	result = run_query(query)
+	knowledge_id_list_from_subunit = result['knowledge_id'].tolist()
+
+	if set(knowledge_id_list_done) == set(knowledge_id_list_from_subunit):
+		query = f"UPDATE student_db.sub_unit_progress SET completion = 1 WHERE student_id = '{student_id}' AND sub_unit_id = '{sub_unit_id}'"
+		run_tx(query)
+	
 
 # update progress (value 0 if incomplete, 1 if complete) for each main-unit (대단원)
-def update_mainunit_progress(student_id):
-	return 
+def update_mainunit_progress(student_id, main_unit_id):
+    #check existence
+	query = f"SELECT * FROM student_db.main_unit_progress WHERE student_id = '{student_id}' AND main_unit_id = '{main_unit_id}'"
+	result = run_query(query)
+    
+	if result.empty:# make new row
+		query = f"INSERT INTO student_db.main_unit_progress VALUES (student_id, main_unit_id, completion) ('{student_id}', '{main_unit_id}', 0)"
+		run_tx(query)
+        
+	# if student complete all sub_unit within the main_unit, update completion to 1
+	
+	# get list of all sub_unit_id where student complete the sub_unit
+	query = f"SELECT sub_unit_id from student_db.sub_unit_progress WHERE student_id = '{student_id}' AND completion = 1"
+	result = run_query(query)
+	sub_unit_id_list_done = result['sub_unit_id'].tolist()
 
+	# get list of all sub_unit_id from knowledge_map_db.sub_unit that belong to the main-unit
+	query = f"SELECT sub_unit_id FROM knowledge_map_db.sub_unit WHERE main_unit_id = '{main_unit_id}'"
+	result = run_query(query)
+	sub_unit_id_list_from_mainunit = result['sub_unit_id'].tolist()
+
+	if set(sub_unit_id_list_done) == set(sub_unit_id_list_from_mainunit):
+		query = f"UPDATE student_db.main_unit_progress SET completion = 1 WHERE student_id = '{student_id}' AND main_unit_id = '{main_unit_id}'"
+		run_tx(query)
+
+    
+    
 # update progress (value 0 if incomplete, 1 if complete) for each area
-def update_area_progress(student_id):
-	return 
+def update_area_progress(student_id, area_id):
+    # check existence
+	query = f"SELECT * FROM student_db.area_progress WHERE student_id = '{student_id}' AND area_id = '{area_id}'"
+	result = run_query(query)
+	
+	if result.empty:# make new row
+		query = f"INSERT INTO student_db.area_progress VALUES (student_id, area_id, completion) ('{student_id}', '{area_id}', 0)"
+		run_tx(query)
+	
+	# if student complete all main_unit within the area, update completion to 1
+	
+	# get list of all main_unit_id where student complete the main_unit
+	query = f"SELECT main_unit_id from student_db.main_unit_progress WHERE student_id = '{student_id}' AND completion = 1"
+	result = run_query(query)
+	main_unit_id_list_done = result['main_unit_id'].tolist()
+	
+ 
+	# get list of all main_unit_id from knowledge_map_db.main_unit that belong to the area
+	query = f"SELECT main_unit_id FROM knowledge_map_db.main_unit WHERE area_id = '{area_id}'"
+	result = run_query(query)
+	main_unit_id_list_from_area = result['main_unit_id'].tolist()
+	
+	if set(main_unit_id_list_done) == set(main_unit_id_list_from_area):
+		query = f"UPDATE student_db.area_progress SET completion = 1 WHERE student_id = '{student_id}' AND area_id = '{area_id}'"
+		run_tx(query)
+
 
 # update progress (value 0 if incomplete, 1 if complete) for each subject
-def update_subject_progress(student_id):
-	return
+def update_subject_progress(student_id, subject_id):
+    #check existence
+	query = f"SELECT * FROM student_db.subject_progress WHERE student_id = '{student_id}' AND subject_id = '{subject_id}'"
+	result = run_query(query)
+	
+	if result.empty:# make new row
+		query = f"INSERT INTO student_db.subject_progress VALUES (student_id, subject_id, completion) ('{student_id}', '{subject_id}', 0)"
+		run_tx(query)
+	
+	# if student complete all area within the subject, update completion to 1
+	
+	# get list of all area_id where student complete the area
+	query = f"SELECT area_id from student_db.area_progress WHERE student_id = '{student_id}' AND completion = 1"
+	result = run_query(query)
+	area_id_list_done = result['area_id'].tolist()
+	
+	# get list of all area_id from knowledge_map_db.area that belong to the subject
+	query = f"SELECT area_id FROM knowledge_map_db.area WHERE subject_id = '{subject_id}'"
+	result = run_query(query)
+	area_id_list_from_subject = result['area_id'].tolist()
+	
+	if set(area_id_list_done) == set(area_id_list_from_subject):
+		query = f"UPDATE student_db.subject_progress SET completion = 1 WHERE student_id = '{student_id}' AND subject_id = '{subject_id}'"
+		run_tx(query)
+	
+
 
 # update student's level of competence for each 역량 요소
 def update_student_competence(student_id):
@@ -586,7 +715,8 @@ def update_student_competence(student_id):
 	
 # update student's progress for each 지식 요소
 def update_student_knowledge(student_id, knowledge_id):
-	return
+	query = f"INSERT INTO student_db.knowledge_progress (student_id, knowledge_id) VALUES ('{student_id}', '{knowledge_id}')"
+	run_tx(query)
 
 def check_connection():
     try:
