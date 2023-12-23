@@ -100,7 +100,7 @@ def get_image_as_base64(path):
     with open(path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode()
 
-encoded_image_1 = get_image_as_base64("mainpage_logo.png")
+encoded_image_1 = get_image_as_base64("src/image/mainpage_logo.png")
 
 st.markdown(
     f"""
@@ -112,7 +112,7 @@ st.markdown(
 )
 
 # Introduction 1
-encoded_image_2 = get_image_as_base64("main_image_4.png")
+encoded_image_2 = get_image_as_base64("src/image/main_image_4.png")
 st.markdown(
     f"""
     <style>
@@ -151,7 +151,7 @@ st.markdown(
 )
 
 # Introduction 2
-encoded_image_3 = get_image_as_base64("main_image_7.png")
+encoded_image_3 = get_image_as_base64("src/image/main_image_7.png")
 st.markdown(
     f"""
     <style>
@@ -187,7 +187,7 @@ st.markdown(
 )
 
 # Introduction 3
-encoded_image_4 = get_image_as_base64("main_image_9.png")
+encoded_image_4 = get_image_as_base64("src/image/main_image_9.png")
 st.markdown(
     f"""
     <center>
@@ -215,8 +215,8 @@ st.markdown(
 )
 
 # Feature Description
-encoded_image_5 = get_image_as_base64("mainpage_logo3.png")
-encoded_image_6 = get_image_as_base64("arrow.png")
+encoded_image_5 = get_image_as_base64("src/image/mainpage_logo3.png")
+encoded_image_6 = get_image_as_base64("src/image/arrow.png")
 st.markdown(
     f"""
     <center style="background-color: rgba(245, 245, 245, 0.5); padding: 10px; border-radius: 10px;">
@@ -239,7 +239,7 @@ st.markdown(
 )
 
 #M1
-encoded_image_7 = get_image_as_base64("main_m1.png")
+encoded_image_7 = get_image_as_base64("src/image/main_m1.png")
 st.markdown(
     f"""
     <div style="display: flex; align-items: flex-start; justify-content: flex-end; gap: 20px;">
@@ -261,7 +261,7 @@ st.markdown(
 )
 
 #M2
-encoded_image_8 = get_image_as_base64("main_m1.png")
+encoded_image_8 = get_image_as_base64("src/image/main_m1.png")
 st.markdown(
     f"""
     <div style="background-color: rgba(245, 245, 245, 0.5); display: flex; align-items: flex-end; justify-content: flex-end; gap: 20px; margin-bottom: 50px;"> 
@@ -285,7 +285,7 @@ st.markdown(
 )
 
 #M3
-encoded_image_9 = get_image_as_base64("main_m1.png")
+encoded_image_9 = get_image_as_base64("src/image/main_m1.png")
 st.markdown(
     f"""
     <div style="display: flex; align-items: flex-start; justify-content: flex-end; gap: 20px;">
